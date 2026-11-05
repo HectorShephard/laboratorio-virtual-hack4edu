@@ -1,0 +1,206 @@
+[gd_scene load_steps=15 format=3]
+
+; Maqueta visual editable. Sus proporciones no definen parámetros de vuelo.
+
+[sub_resource type="StandardMaterial3D" id="Material_Base"]
+albedo_color = Color(0.14902, 0.23922, 0.31373, 1)
+roughness = 0.63
+
+[sub_resource type="StandardMaterial3D" id="Material_Botella"]
+albedo_color = Color(0.12941, 0.55686, 0.67059, 0.66)
+roughness = 0.27
+transparency = 1
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Material_Etiqueta"]
+albedo_color = Color(0.90196, 0.93725, 0.95294, 1)
+roughness = 0.63
+
+[sub_resource type="StandardMaterial3D" id="Material_Acento"]
+albedo_color = Color(0.87059, 0.93725, 0.5098, 1)
+roughness = 0.63
+
+[sub_resource type="StandardMaterial3D" id="Material_Boquilla"]
+albedo_color = Color(0.32941, 0.4, 0.44706, 1)
+roughness = 0.38
+
+[sub_resource type="BoxMesh" id="Caja"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="CylinderMesh" id="SoporteCilindrico"]
+top_radius = 0.39
+bottom_radius = 0.47
+height = 0.22
+radial_segments = 32
+rings = 1
+
+[sub_resource type="CylinderMesh" id="BoquillaCilindrica"]
+top_radius = 0.19
+bottom_radius = 0.16
+height = 0.29
+radial_segments = 32
+rings = 1
+
+[sub_resource type="CylinderMesh" id="CuelloBotella"]
+top_radius = 0.48
+bottom_radius = 0.2
+height = 0.35
+radial_segments = 32
+rings = 1
+
+[sub_resource type="CylinderMesh" id="CilindroBotella"]
+top_radius = 0.48
+bottom_radius = 0.48
+height = 1.52
+radial_segments = 32
+rings = 1
+
+[sub_resource type="CylinderMesh" id="BandaEtiqueta"]
+top_radius = 0.485
+bottom_radius = 0.485
+height = 0.4
+radial_segments = 32
+rings = 1
+
+[sub_resource type="CylinderMesh" id="BandaAcento"]
+top_radius = 0.492
+bottom_radius = 0.492
+height = 0.09
+radial_segments = 32
+rings = 1
+
+[sub_resource type="CylinderMesh" id="PuntaConica"]
+top_radius = 0.025
+bottom_radius = 0.48
+height = 0.66
+radial_segments = 32
+rings = 1
+
+[sub_resource type="SphereMesh" id="Esfera"]
+radius = 0.5
+height = 1.0
+radial_segments = 20
+rings = 10
+
+[node name="CoheteDeAgua" type="Node3D"]
+
+[node name="Plataforma" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.16, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(2.05, 0.22, 1.85)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Base")
+
+[node name="PataIzquierda" type="MeshInstance3D" parent="."]
+position = Vector3(-0.8, 0.065, 0.6)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.18, 0.13, 0.23)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Boquilla")
+
+[node name="PataDerecha" type="MeshInstance3D" parent="."]
+position = Vector3(0.8, 0.065, 0.6)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.18, 0.13, 0.23)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Boquilla")
+
+[node name="PataTraseraI" type="MeshInstance3D" parent="."]
+position = Vector3(-0.8, 0.065, -0.6)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.18, 0.13, 0.23)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Boquilla")
+
+[node name="PataTraseraD" type="MeshInstance3D" parent="."]
+position = Vector3(0.8, 0.065, -0.6)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.18, 0.13, 0.23)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Boquilla")
+
+[node name="Soporte" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.36, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+mesh = SubResource("SoporteCilindrico")
+material_override = SubResource("Material_Boquilla")
+
+[node name="BoquillaVisible" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.59, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+mesh = SubResource("BoquillaCilindrica")
+material_override = SubResource("Material_Boquilla")
+
+[node name="Cuello" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.87, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+mesh = SubResource("CuelloBotella")
+material_override = SubResource("Material_Botella")
+
+[node name="CuerpoBotella" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.76, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+mesh = SubResource("CilindroBotella")
+material_override = SubResource("Material_Botella")
+
+[node name="Etiqueta" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.91, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+mesh = SubResource("BandaEtiqueta")
+material_override = SubResource("Material_Etiqueta")
+
+[node name="BandaVerde" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.88, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+mesh = SubResource("BandaAcento")
+material_override = SubResource("Material_Acento")
+
+[node name="Punta" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.85, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1, 1, 1)
+mesh = SubResource("PuntaConica")
+material_override = SubResource("Material_Base")
+
+[node name="PuntaVisible" type="MeshInstance3D" parent="."]
+position = Vector3(0, 3.16, 0)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.08, 0.09, 0.08)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Acento")
+
+[node name="AletaIzquierda" type="MeshInstance3D" parent="."]
+position = Vector3(-0.55, 1.13, 0)
+rotation = Vector3(0, 0, -0.32)
+scale = Vector3(0.47, 0.48, 0.11)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Base")
+
+[node name="AletaDerecha" type="MeshInstance3D" parent="."]
+position = Vector3(0.55, 1.13, 0)
+rotation = Vector3(0, 0, 0.32)
+scale = Vector3(0.47, 0.48, 0.11)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Base")
+
+[node name="AletaPosterior" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.13, -0.55)
+rotation = Vector3(0.32, 0, 0)
+scale = Vector3(0.11, 0.48, 0.47)
+mesh = SubResource("Caja")
+material_override = SubResource("Material_Base")
+
+[node name="PuntoDeAgarre" type="Marker3D" parent="."]
+position = Vector3(0, 1.75, 0)
+
+[node name="SalidaDeBoquilla" type="Marker3D" parent="."]
+position = Vector3(0, 0.44, 0)
+
+[node name="AnclajeLanzamiento" type="Marker3D" parent="."]
+position = Vector3(0, 0.27, 0)

@@ -36,3 +36,5 @@ Publica los avances en tu rama y abre una solicitud de cambios hacia `main`. Ind
 Acordar las entradas, las unidades y la salida de la primera práctica científica. Mario prepara el modelo y sus casos de referencia. Héctor conecta la práctica con la mesa y registra las mediciones en la bitácora.
 
 El [contrato de experimentos](docs/contrato_experimentos.md) documenta el intercambio entre las dos partes. En la mesa, **Práctica de prueba** abre el primer flujo de ensayos con datos técnicos. Sigue la [comprobación de la mesa y la bitácora](docs/pruebas/mesa_y_bitacora.md) para probar la configuración, el guardado y la recuperación de dos ensayos.
+
+Abre `6_VER_MODELOS_3D.bat` para revisar y girar los modelos del cohete, el instrumental de química y el sapo exterior. Consulta [los recursos 3D](docs/modelos/recursos_3d.md) para preparar su integración.

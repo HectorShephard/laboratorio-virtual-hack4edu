@@ -1,0 +1,282 @@
+[gd_scene load_steps=8 format=3]
+
+; Maqueta exterior estilizada. Requiere especie, referencia y escala para una práctica anatómica.
+
+[sub_resource type="StandardMaterial3D" id="Material_Piel"]
+albedo_color = Color(0.44706, 0.58039, 0.35686, 1)
+roughness = 0.63
+
+[sub_resource type="StandardMaterial3D" id="Material_PielOscura"]
+albedo_color = Color(0.25098, 0.36078, 0.23529, 1)
+roughness = 0.63
+
+[sub_resource type="StandardMaterial3D" id="Material_Vientre"]
+albedo_color = Color(0.77647, 0.79216, 0.56863, 1)
+roughness = 0.63
+
+[sub_resource type="StandardMaterial3D" id="Material_Iris"]
+albedo_color = Color(0.83922, 0.64706, 0.30196, 1)
+roughness = 0.32
+
+[sub_resource type="StandardMaterial3D" id="Material_Pupila"]
+albedo_color = Color(0.094118, 0.12157, 0.10196, 1)
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="Material_Reflejo"]
+albedo_color = Color(0.92941, 0.95686, 0.85098, 1)
+roughness = 0.2
+
+[sub_resource type="SphereMesh" id="Esfera"]
+radius = 0.5
+height = 1.0
+radial_segments = 20
+rings = 10
+
+[node name="SapoExterior" type="Node3D"]
+
+[node name="Cuerpo" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.71, -0.23)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1.9, 1.2, 2.22)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="Vientre" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.47, 0.2)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1.64, 0.66, 1.62)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Vientre")
+
+[node name="Cabeza" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.84, 0.69)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1.95, 0.92, 1.38)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="Hocico" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.64, 1.08)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1.52, 0.36, 0.59)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Vientre")
+
+[node name="LineaBoca" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.68, 1.331)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(1.22, 0.04, 0.07)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="MusloIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.97, 0.54, -0.54)
+rotation = Vector3(0, -0.39, 0)
+scale = Vector3(0.9, 0.84, 1.42)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="PataTraseraIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-1.33, 0.32, -0.03)
+rotation = Vector3(0, 0.59, 0)
+scale = Vector3(0.62, 0.49, 1.12)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="PataDelanteraIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.82, 0.37, 0.82)
+rotation = Vector3(0.37, 0.16, -0.18)
+scale = Vector3(0.39, 0.63, 0.59)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="PieIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.95, 0.18, 1.15)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.46, 0.24, 0.46)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Vientre")
+
+[node name="DedoIzq1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.79, 0.14, 1.34)
+rotation = Vector3(0, 0.16, 0)
+scale = Vector3(0.105, 0.11, 0.33)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="DedoIzq2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.94, 0.14, 1.365)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.105, 0.11, 0.33)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="DedoIzq3" type="MeshInstance3D" parent="."]
+position = Vector3(-1.09, 0.14, 1.39)
+rotation = Vector3(0, -0.16, 0)
+scale = Vector3(0.105, 0.11, 0.33)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="ParpadoIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.61, 1.235, 0.78)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.57, 0.53, 0.56)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="OjoIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.61, 1.26, 1)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.43, 0.4, 0.26)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Iris")
+
+[node name="PupilaIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.61, 1.26, 1.109)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.29, 0.125, 0.074)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Pupila")
+
+[node name="ReflejoIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.675, 1.297, 1.146)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.071, 0.066, 0.033)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Reflejo")
+
+[node name="NarinaIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.25, 0.86, 1.278)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.11, 0.066, 0.046)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="MusloDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.97, 0.54, -0.54)
+rotation = Vector3(0, 0.39, 0)
+scale = Vector3(0.9, 0.84, 1.42)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="PataTraseraDer" type="MeshInstance3D" parent="."]
+position = Vector3(1.33, 0.32, -0.03)
+rotation = Vector3(0, -0.59, 0)
+scale = Vector3(0.62, 0.49, 1.12)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="PataDelanteraDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.82, 0.37, 0.82)
+rotation = Vector3(0.37, -0.16, 0.18)
+scale = Vector3(0.39, 0.63, 0.59)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="PieDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.95, 0.18, 1.15)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.46, 0.24, 0.46)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Vientre")
+
+[node name="DedoDer1" type="MeshInstance3D" parent="."]
+position = Vector3(0.79, 0.14, 1.34)
+rotation = Vector3(0, -0.16, 0)
+scale = Vector3(0.105, 0.11, 0.33)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="DedoDer2" type="MeshInstance3D" parent="."]
+position = Vector3(0.94, 0.14, 1.365)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.105, 0.11, 0.33)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="DedoDer3" type="MeshInstance3D" parent="."]
+position = Vector3(1.09, 0.14, 1.39)
+rotation = Vector3(0, 0.16, 0)
+scale = Vector3(0.105, 0.11, 0.33)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Piel")
+
+[node name="ParpadoDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.61, 1.235, 0.78)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.57, 0.53, 0.56)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="OjoDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.61, 1.26, 1)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.43, 0.4, 0.26)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Iris")
+
+[node name="PupilaDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.61, 1.26, 1.109)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.29, 0.125, 0.074)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Pupila")
+
+[node name="ReflejoDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.545, 1.297, 1.146)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.071, 0.066, 0.033)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_Reflejo")
+
+[node name="NarinaDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.25, 0.86, 1.278)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.11, 0.066, 0.046)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="Mancha1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.37, 1.22, -0.44)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.19, 0.11, 0.24)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="Mancha2" type="MeshInstance3D" parent="."]
+position = Vector3(0.36, 1.22, -0.39)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.19, 0.11, 0.24)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="Mancha3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.47, 1.15, -0.85)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.19, 0.11, 0.24)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="Mancha4" type="MeshInstance3D" parent="."]
+position = Vector3(0.47, 1.14, -0.82)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.19, 0.11, 0.24)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="Mancha5" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.28, -0.65)
+rotation = Vector3(0, 0, 0)
+scale = Vector3(0.19, 0.11, 0.24)
+mesh = SubResource("Esfera")
+material_override = SubResource("Material_PielOscura")
+
+[node name="CentroDeVista" type="Marker3D" parent="."]
+position = Vector3(0, 0.76, 0.2)
+
+[node name="AnclajeAnatomia" type="Marker3D" parent="."]
+position = Vector3(0, 0.51, 0.2)
+
+[node name="ReferenciaEscala" type="Marker3D" parent="."]
+position = Vector3(0, 0, 0)
