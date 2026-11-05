@@ -11,7 +11,7 @@ ACTUALIZAR LA INSTALACION QUE YA FUNCIONA
 2. Abre el ZIP, entra en Prueba_Lab3D_Hack4Edu y copia su contenido a la carpeta
    actual donde estan los archivos .bat. Acepta reemplazar archivos.
 3. Abre 2_PROBAR_LAB3D.bat. Reutiliza las dependencias y Godot que ya preparaste.
-4. Empezaras recorriendo el cuarto. Pulsa E para activar la mesa y las manos.
+4. Empezaras recorriendo el cuarto. Pulsa Tab para activar la mesa y las manos.
 El nuevo 5_IR_A_LA_MESA.bat empieza directamente en la mesa, como antes.
 
 INSTALACION EN UN EQUIPO NUEVO
@@ -24,9 +24,12 @@ En otra PC hay que preparar de nuevo; copiar .venv no crea Python portable.
 MODO RECORRER LA SALA
 - WASD: caminar.
 - Haz clic dentro de la sala para mirar con el raton.
-- Esc: liberar el cursor para usar los botones.
-- E o Tab: ir a la mesa de pruebas.
+- Esc: liberar el cursor.
+- Apunta a un modelo cercano y pulsa E para inspeccionarlo. Las flechas
+  izquierda y derecha giran el modelo.
+- Tab: ir a la mesa de pruebas.
 - Q o cerrar ventana: salir.
+7_RECORRER_LABORATORIO.bat abre la sala sin usar la webcam.
 Mientras recorres la sala, las manos quedan en pausa. Es normal que la camara
 no este activa hasta que entres a la mesa. El cambio puede tardar unos segundos
 en liberar o preparar el detector.
@@ -45,8 +48,8 @@ MODO MESA DE PRUEBAS
 3_COMPARAR_RATON.bat permite ir directamente a la mesa sin usar la webcam.
 
 QUE FUNCIONA Y QUE ES AMBIENTACION
-El cubo central es el objeto manipulable. El instrumental lateral, las maquetas,
-los frascos y la estanteria son ambientacion para preparar las futuras estaciones.
+Puedes inspeccionar y girar el cohete, el instrumental y la maqueta del sapo.
+El agarre con la mano o el raton se prueba con el cubo de la mesa central.
 Todavia no simulan reacciones, circuitos ni experimentos cientificos.
 La mano controla X/Z sobre la mesa; al agarrar se eleva el cubo a una altura fija.
 Esta version no mide profundidad real de la mano ni incluye rotacion libre.

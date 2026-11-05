@@ -11,12 +11,17 @@ const GOLD := Color("ffce73")
 
 var base_dir: String = ProjectSettings.globalize_path("res://").trim_suffix("/").get_base_dir()
 var camera: Camera3D
-var room: Node3D
+var room: LabRoom
 var player: CharacterBody3D
 var explore_camera: Camera3D
 var exploring := false
 var bench_start := false
-var navigation_button: Button
+var station_ray: RayCast3D
+var focused_station := -1
+var inspecting_station := -1
+var explore_hud: Control
+var crosshair: Label
+var explore_status: Label
 var measure_button: Button
 var experiment_button: Button
 var experiment_panel: ExperimentPanel
@@ -83,6 +88,7 @@ func _ready() -> void:
 	_build_world()
 	_build_hud()
 	var args := OS.get_cmdline_user_args()
+	var explore_start := args.has("--explore")
 	var i := 0
 	while i < args.size():
 		if args[i] == "--mouse":
@@ -113,7 +119,7 @@ func _ready() -> void:
 		bridge_status = "Esperando al seguimiento local…"
 	elif not mouse_mode:
 		_start_bridge()
-	if not bench_start and not mouse_mode and not synthetic:
+	if not bench_start and (explore_start or (not mouse_mode and not synthetic)):
 		_enter_explore()
 	else:
 		_enter_workbench()
@@ -232,12 +238,22 @@ func _build_player() -> void:
 	explore_camera.fov = 72
 	explore_camera.position = Vector3(0, 1.65, 0)
 	player.add_child(explore_camera)
+	station_ray = RayCast3D.new()
+	station_ray.enabled = false
+	station_ray.target_position = Vector3(0, 0, -2.75)
+	station_ray.collide_with_areas = true
+	station_ray.add_exception(player)
+	explore_camera.add_child(station_ray)
 
 func _enter_explore() -> void:
 	if measure_start >= 0:
 		_save_measure(false)
 	_drop(false)
 	exploring = true
+	focused_station = -1
+	inspecting_station = -1
+	hud.hide()
+	explore_hud.show()
 	pointer.visible = false
 	previous_pressed = false
 	pinch_armed = false
@@ -252,6 +268,8 @@ func _enter_explore() -> void:
 
 func _enter_workbench() -> void:
 	exploring = false
+	explore_hud.hide()
+	hud.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	explore_camera.current = false
 	camera.current = true
@@ -286,6 +304,18 @@ func _physics_process(delta: float) -> void:
 	player.velocity.x = move_toward(player.velocity.x, direction.x * 3.0, 16 * delta)
 	player.velocity.z = move_toward(player.velocity.z, direction.z * 3.0, 16 * delta)
 	player.move_and_slide()
+	if exploring:
+		_update_station_focus(delta)
+
+func _update_station_focus(delta: float) -> void:
+	station_ray.force_raycast_update()
+	var hit := station_ray.get_collider()
+	focused_station = int(hit.get_meta("station_index", -1)) if hit is Area3D else -1
+	if inspecting_station != focused_station:
+		inspecting_station = -1
+	if inspecting_station >= 0:
+		var turn := float(Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_LEFT))
+		room.station_models[inspecting_station].rotate_y(turn * 1.65 * delta)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not exploring:
@@ -304,7 +334,12 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_E, KEY_TAB]:
-		_toggle_navigation()
+		if event.keycode == KEY_E and exploring:
+			if focused_station >= 0:
+				inspecting_station = -1 if inspecting_station == focused_station else focused_station
+			_update_explore_hud()
+		else:
+			_toggle_navigation()
 		get_viewport().set_input_as_handled()
 
 func _panel(color: Color, radius: int = 14) -> StyleBoxFlat:
@@ -391,8 +426,7 @@ func _build_hud() -> void:
 	column.add_child(count_label)
 	mode_button = _button("Comparar con ratón", _toggle_mode)
 	column.add_child(mode_button)
-	navigation_button = _button("Explorar sala [Tab]", _toggle_navigation)
-	column.add_child(navigation_button)
+	column.add_child(_button("Explorar sala [Tab]", _toggle_navigation))
 	measure_button = _button("Medir 60 s [Espacio]", _start_measure)
 	column.add_child(measure_button)
 	experiment_button = _button("Práctica de prueba", _open_experiment)
@@ -418,6 +452,64 @@ func _build_hud() -> void:
 	experiment_panel.offset_top = 22
 	experiment_panel.offset_right = -24
 	experiment_panel.offset_bottom = -18
+	_build_explore_hud(layer)
+
+func _build_explore_hud(layer: CanvasLayer) -> void:
+	explore_hud = Control.new()
+	explore_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(explore_hud)
+	explore_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	explore_hud.hide()
+
+	var nameplate := _label("  HACK4EDU  /  LABORATORIO DE CIENCIAS", 15)
+	explore_hud.add_child(nameplate)
+	nameplate.position = Vector2(20, 19)
+	nameplate.add_theme_color_override("font_shadow_color", Color("102833"))
+	nameplate.add_theme_constant_override("shadow_offset_y", 2)
+
+	crosshair = _label("+", 24)
+	explore_hud.add_child(crosshair)
+	crosshair.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	crosshair.offset_left = -16
+	crosshair.offset_right = 16
+	crosshair.offset_top = -16
+	crosshair.offset_bottom = 16
+	crosshair.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crosshair.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	crosshair.add_theme_color_override("font_outline_color", Color("102833"))
+	crosshair.add_theme_constant_override("outline_size", 4)
+
+	var strip := PanelContainer.new()
+	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	explore_hud.add_child(strip)
+	strip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	strip.offset_left = 24
+	strip.offset_right = -24
+	strip.offset_top = -103
+	strip.offset_bottom = -18
+	strip.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	strip.add_theme_stylebox_override("panel", _panel(Color("13232fdd")))
+	var controls := VBoxContainer.new()
+	controls.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	strip.add_child(controls)
+	explore_status = _label("", 16)
+	explore_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	controls.add_child(explore_status)
+	controls.add_child(_label("WASD  Caminar     Ratón  Mirar     Tab  Mesa de pruebas     Esc  Soltar cursor     Q  Salir", 13, MUTED))
+
+func _update_explore_hud() -> void:
+	var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	crosshair.visible = captured
+	crosshair.modulate = TEAL if focused_station >= 0 else Color.WHITE
+	if inspecting_station >= 0:
+		var station: Dictionary = LabRoom.STATIONS[inspecting_station]
+		explore_status.text = "%s · %s  [← / →] Girar  [E] Cerrar" % [station.title, station.detail]
+	elif not captured:
+		explore_status.text = "Haz clic dentro de la sala para mirar a tu alrededor."
+	elif focused_station >= 0:
+		explore_status.text = "[E] Inspeccionar · " + str(LabRoom.STATIONS[focused_station].title)
+	else:
+		explore_status.text = "Acércate a una estación y apunta al modelo."
 
 func _open_experiment() -> void:
 	if exploring or measure_start >= 0:
@@ -719,20 +811,10 @@ func _reset_cube() -> void:
 	cube.sleeping = false
 
 func _update_ui(now: float, valid: bool, pressed: bool, in_zone: bool) -> void:
-	navigation_button.text = "Ir a la mesa [E]" if exploring else "Explorar sala [Tab]"
-	measure_button.disabled = exploring
-	experiment_button.disabled = exploring or measure_start >= 0
-	mode_button.disabled = exploring
 	if exploring:
-		subtitle_label.text = "Recorre la sala y pulsa E cuando quieras trabajar en la mesa."
-		preview.visible = false
-		status_label.text = "Explorando la sala"
-		status_label.add_theme_color_override("font_color", TEAL)
-		metrics_label.text = "Entorno 3D: %d FPS\nManos: en pausa" % Engine.get_frames_per_second()
-		count_label.text = "Mesa central: interactiva\nEstaciones laterales: ambientación"
-		note_label.text = "WASD: caminar\nE / Tab: ir a la mesa\nEsc: cursor libre  ·  Q: salir"
-		instruction_label.text = "Haz clic en la sala para mirar con el ratón. WASD para moverte. E para usar la mesa."
+		_update_explore_hud()
 		return
+	experiment_button.disabled = measure_start >= 0
 	subtitle_label.text = "Haz pinza sobre el cubo, muévelo al círculo y abre los dedos para soltarlo."
 	mode_button.text = "Volver a la cámara" if mouse_mode else "Comparar con ratón"
 	preview.visible = not mouse_mode and error_message.is_empty()
@@ -895,7 +977,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_start_measure()
 		elif event.keycode == KEY_ESCAPE:
 			if exploring:
+				inspecting_station = -1
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				_update_explore_hud()
 			else:
 				_close()
 

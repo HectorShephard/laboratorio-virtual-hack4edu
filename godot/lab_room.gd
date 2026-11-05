@@ -1,6 +1,34 @@
 extends Node3D
 
 const FLOOR_Y := -1.2
+const STATIONS := [
+	{
+		"title": "QUÍMICA · Reacción y CO₂",
+		"sign": "01  /  QUÍMICA",
+		"detail": "Observa el vaso y los instrumentos para dosificar los reactivos.",
+		"scene": preload("res://recursos/modelos3d/instrumental_quimica.tscn"),
+		"color": Color("37b8a5"),
+		"scale": .40,
+	},
+	{
+		"title": "FÍSICA · Cohete de agua",
+		"sign": "02  /  FÍSICA",
+		"detail": "Identifica la botella, la boquilla, las aletas y la base de lanzamiento.",
+		"scene": preload("res://recursos/modelos3d/cohete_agua.tscn"),
+		"color": Color("edb76d"),
+		"scale": .49,
+	},
+	{
+		"title": "BIOLOGÍA · Anatomía del sapo",
+		"sign": "03  /  BIOLOGÍA",
+		"detail": "Observa la forma exterior del sapo, sus ojos y sus extremidades.",
+		"scene": preload("res://recursos/modelos3d/sapo_exterior.tscn"),
+		"color": Color("8ccd81"),
+		"scale": .48,
+	},
+]
+
+var station_models: Array[Node3D] = []
 var materials: Dictionary = {}
 var front_meshes: Array[Node3D] = []
 
@@ -146,14 +174,40 @@ func _build() -> void:
 		_box(Vector3(.1, 2.2, .7), Vector3(x, -.15, -5.9), Color("4a727d"), true)
 	for x in [-2.6, -1.6, -.6, .6, 1.6, 2.6]:
 		_box(Vector3(.38, .48, .43), Vector3(x, .19, -5.9), Color("6da7ae") if x < 0 else Color("e2bc7f"))
-	var chemistry := _label("QUÍMICA\nZona en preparación", Vector3(-6.84, 1.55, -1.4), .005, Color("214e5b"))
-	chemistry.rotation.y = PI / 2
-	var physics := _label("FÍSICA Y ELECTRICIDAD\nZona en preparación", Vector3(6.84, 1.55, -1.4), .0045, Color("214e5b"))
-	physics.rotation.y = -PI / 2
+	for index in STATIONS.size():
+		_build_station(index)
 	# Referencia visual de la mesa de trabajo central.
 	_box(Vector3(3.2, .6, .08), Vector3(0, -.54, 2.4), Color("285f6a"))
 	_label("MESA DE PRUEBAS", Vector3(0, -.48, 2.46), .0045)
-	_label("Acércate o pulsa E para trabajar", Vector3(0, -.72, 2.47), .0028, Color("8de6d0"))
+	_label("Pulsa Tab para trabajar", Vector3(0, -.72, 2.47), .0028, Color("8de6d0"))
+
+func _build_station(index: int) -> void:
+	var station: Dictionary = STATIONS[index]
+	var center := Vector3((index - 1) * 3.75, -.12, -4.05)
+	_bench(center, Vector2(2.42, 1.85))
+	_box(Vector3(2.4, .06, .04), center + Vector3(0, .03, .946), station.color)
+	_box(Vector3(2.6, .42, .06), center + Vector3(0, 1.9, -.91), Color("183d4b"))
+	_label(station.sign, center + Vector3(0, 1.9, -.867), .005, station.color)
+
+	var packed: PackedScene = station.scene
+	var model := packed.instantiate() as Node3D
+	model.position = center + Vector3(0, .113, 0)
+	model.scale = Vector3.ONE * float(station.scale)
+	add_child(model)
+	station_models.append(model)
+
+	# La mira detecta el volumen de exhibición sin bloquear al visitante.
+	var target := Area3D.new()
+	target.set_meta("station_index", index)
+	target.collision_mask = 0
+	target.monitoring = false
+	add_child(target)
+	target.position = center + Vector3(0, .88, 0)
+	var hitbox := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.38, 1.53, 1.8)
+	hitbox.shape = shape
+	target.add_child(hitbox)
 
 func set_workbench_view(enabled: bool) -> void:
 	for item in front_meshes:
