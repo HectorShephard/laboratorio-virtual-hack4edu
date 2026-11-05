@@ -1,0 +1,110 @@
+CUARTO DE CIENCIAS - HACK4EDU
+Duelistas del Tamarindo
+
+QUE CONTIENE
+Un primer cuarto 3D con suelo, paredes, techo, puerta, ventanas, estanteria,
+mesa central y zonas laterales de quimica, fisica y electricidad.
+Puedes recorrerlo y cambiar a la mesa para manipular el cubo con una mano.
+
+ACTUALIZAR LA INSTALACION QUE YA FUNCIONA
+1. Cierra el laboratorio y espera a que termine su consola.
+2. Abre el ZIP, entra en Prueba_Lab3D_Hack4Edu y copia su contenido a la carpeta
+   actual donde estan los archivos .bat. Acepta reemplazar archivos.
+3. Abre 2_PROBAR_LAB3D.bat. Reutiliza las dependencias y Godot que ya preparaste.
+4. Empezaras recorriendo el cuarto. Pulsa E para activar la mesa y las manos.
+El nuevo 5_IR_A_LA_MESA.bat empieza directamente en la mesa, como antes.
+
+INSTALACION EN UN EQUIPO NUEVO
+1. Extrae todo el ZIP en una carpeta. Usa Python 3.13, 3.12 o 3.11 de 64 bits.
+2. Ejecuta 1_PREPARAR.bat con internet. Crea un entorno separado, instala las
+   dependencias y descarga el modelo y Godot 4.7.2 portable desde fuentes oficiales.
+3. Abre 2_PROBAR_LAB3D.bat. No necesitas configurar el editor de Godot.
+En otra PC hay que preparar de nuevo; copiar .venv no crea Python portable.
+
+MODO RECORRER LA SALA
+- WASD: caminar.
+- Haz clic dentro de la sala para mirar con el raton.
+- Esc: liberar el cursor para usar los botones.
+- E o Tab: ir a la mesa de pruebas.
+- Q o cerrar ventana: salir.
+Mientras recorres la sala, las manos quedan en pausa. Es normal que la camara
+no este activa hasta que entres a la mesa. El cambio puede tardar unos segundos
+en liberar o preparar el detector.
+
+MODO MESA DE PRUEBAS
+- Muestra UNA mano abierta, completa y con buena luz de frente.
+- Mueve el cursor blanco hasta el cubo verde.
+- Haz pinza con pulgar e indice para agarrarlo. El cubo se pone amarillo.
+- Muevelo al circulo y abre los dedos para soltarlo. Cae sobre la mesa.
+- R: volver a colocar el cubo en el inicio.
+- E o Tab: volver a recorrer el cuarto.
+- Espacio: medir durante 60 segundos y guardar JSON/CSV en resultados.
+- Comparar con raton: pausa la camara; agarras manteniendo clic izquierdo.
+- Volver a la camara: reabre MediaPipe.
+- Esc, Q o cerrar ventana: guardar una medicion parcial y salir.
+3_COMPARAR_RATON.bat permite ir directamente a la mesa sin usar la webcam.
+
+QUE FUNCIONA Y QUE ES AMBIENTACION
+El cubo central es el objeto manipulable. El instrumental lateral, las maquetas,
+los frascos y la estanteria son ambientacion para preparar las futuras estaciones.
+Todavia no simulan reacciones, circuitos ni experimentos cientificos.
+La mano controla X/Z sobre la mesa; al agarrar se eleva el cubo a una altura fija.
+Esta version no mide profundidad real de la mano ni incluye rotacion libre.
+Las proporciones del cuarto son provisionales para probar el espacio.
+
+PROTECCION DEL SEGUIMIENTO
+- Descarta saltos bruscos de posicion o tamano y valida una ubicacion nueva con
+  varias observaciones consistentes.
+- Durante una interrupcion breve, el cubo agarrado queda quieto.
+- Al recuperar la mano se reajusta el punto de agarre para evitar un salto.
+- Si la interrupcion supera 0.6 segundos, el cubo se suelta desde la ultima posicion
+  valida. Vuelve a mostrar la mano abierta antes de agarrarlo otra vez.
+Los movimientos muy rapidos pueden activar esta proteccion. La deteccion con
+los dedos ocultos sigue dependiendo de lo que la camara pueda ver.
+
+MEDIR EL RESULTADO EN TU EQUIPO
+El panel de la mesa separa:
+- Entorno 3D (FPS): frecuencia de dibujo de Godot, con objetivo maximo de 60.
+- Seguimiento (Hz): resultados procesados por segundo en Python.
+- Lectura camara: imagenes leidas por segundo en el bucle, limitado tambien por
+  el procesamiento; no es una medida de la frecuencia fisica del sensor.
+- Inferencia (ms): tiempo del modelo, distinto del retraso total camara-pantalla.
+Haz un minuto con camara y otro con raton. Intenta 10 ciclos de agarrar, mover y
+soltar; cuenta los intentos y fallos manualmente para comparar.
+"datos_con_mano_pct" es presencia detectada, no precision. El CSV incluye
+"control_estable" y el JSON cuenta muestras descartadas por el filtro.
+
+CONEXION LOCAL Y DATOS
+Python abre la camara y Godot. Solo las posiciones y estados se intercambian
+mediante un archivo JSON temporal local. No necesita internet durante el uso una
+vez preparado. No graba ni envia fotos o videos. El panel dibuja el esqueleto de
+la mano; no presenta una segunda ventana de video en el modo 3D.
+Al cerrar se eliminan los archivos temporales de la conexion.
+
+SI ALGO FALLA
+- Cierra Camara, Teams, Zoom, OBS y la prueba 2D antes de usar la webcam en 3D.
+- Revisa permisos de camara para aplicaciones de escritorio en Windows.
+- Para probar otra camara, abre CMD en esta carpeta y ejecuta:
+  2_PROBAR_LAB3D.bat --camera 1
+- Para solicitar otra resolucion:
+  2_PROBAR_LAB3D.bat --width 480 --height 360
+  El controlador puede elegir otra resolucion.
+- Para cambiar sensibilidad de pinza:
+  2_PROBAR_LAB3D.bat --pinch 0.45
+- 4_PROBAR_CAMARA_SOLA.bat abre la prueba 2D y guarda registros/camara_sola.log.
+- El arranque de Python queda en registros/inicio_directo.log y los mensajes de
+  Godot en registros/godot_directo.log. Comparte el texto si hay un error.
+- El renderizador Compatibility necesita OpenGL 3.3 y controladores funcionales.
+
+VALIDACION
+Se comprobo en Linux con Godot 4.7.2: recorrido, suelo, colisiones con mesa y
+paredes, alternancia de vistas, controles dentro de la ventana y proteccion de
+agarre. La conexion se probo con datos simulados, marcados como tales, y el modelo
+con una imagen oficial que sustituye la camara. No se ha accedido a tu webcam.
+La apariencia y la fluidez finales deben comprobarse en tu pantalla y Windows.
+
+FUENTES TECNICAS
+https://github.com/godotengine/godot/releases/tag/4.7.2-stable
+https://godotengine.org/license/
+https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/python
+https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html
