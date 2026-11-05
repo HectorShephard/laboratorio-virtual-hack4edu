@@ -3,6 +3,7 @@ extends Node3D
 const PreviewScript = preload("res://hand_preview.gd")
 const TrackingGuard = preload("res://tracking_guard.gd")
 const LabRoom = preload("res://lab_room.gd")
+const ExperimentPanel = preload("res://ui/experiment_panel.gd")
 const INK := Color("d9eaf0")
 const MUTED := Color("87a2af")
 const TEAL := Color("48d5bc")
@@ -17,6 +18,8 @@ var exploring := false
 var bench_start := false
 var navigation_button: Button
 var measure_button: Button
+var experiment_button: Button
+var experiment_panel: ExperimentPanel
 var subtitle_label: Label
 var cube: RigidBody3D
 var cube_material: StandardMaterial3D
@@ -295,6 +298,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		explore_camera.rotation.x = clampf(explore_camera.rotation.x - event.screen_relative.y * .002, -1.05, 1.05)
 
 func _input(event: InputEvent) -> void:
+	if experiment_panel != null and experiment_panel.visible:
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+			experiment_panel.hide()
+			get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_E, KEY_TAB]:
 		_toggle_navigation()
 		get_viewport().set_input_as_handled()
@@ -387,6 +395,8 @@ func _build_hud() -> void:
 	column.add_child(navigation_button)
 	measure_button = _button("Medir 60 s [Espacio]", _start_measure)
 	column.add_child(measure_button)
+	experiment_button = _button("Práctica de prueba", _open_experiment)
+	column.add_child(experiment_button)
 	note_label = _label("Señal local · Sin grabar video\nR: reiniciar  ·  Esc: salir", 11, MUTED)
 	note_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(note_label)
@@ -400,6 +410,24 @@ func _build_hud() -> void:
 	hud.add_child(bottom)
 	instruction_label = _label("Prueba de interacción: escena 3D, control de la mano sobre un plano de trabajo.", 13, MUTED)
 	bottom.add_child(instruction_label)
+	experiment_panel = ExperimentPanel.new()
+	experiment_panel.hide()
+	hud.add_child(experiment_panel)
+	experiment_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	experiment_panel.offset_left = 24
+	experiment_panel.offset_top = 22
+	experiment_panel.offset_right = -24
+	experiment_panel.offset_bottom = -18
+
+func _open_experiment() -> void:
+	if exploring or measure_start >= 0:
+		return
+	_drop(false)
+	pointer.visible = false
+	pinch_armed = false
+	previous_pressed = false
+	cursor_initialized = false
+	experiment_panel.open_panel()
 
 func _start_bridge() -> void:
 	error_message = ""
@@ -578,6 +606,8 @@ func _process(delta: float) -> void:
 			_close()
 		return
 	_read_bridge()
+	if experiment_panel.visible:
+		return
 	var valid := false
 	var pressed := false
 	var target := Vector3.ZERO
@@ -691,6 +721,7 @@ func _reset_cube() -> void:
 func _update_ui(now: float, valid: bool, pressed: bool, in_zone: bool) -> void:
 	navigation_button.text = "Ir a la mesa [E]" if exploring else "Explorar sala [Tab]"
 	measure_button.disabled = exploring
+	experiment_button.disabled = exploring or measure_start >= 0
 	mode_button.disabled = exploring
 	if exploring:
 		subtitle_label.text = "Recorre la sala y pulsa E cuando quieras trabajar en la mesa."
@@ -853,6 +884,8 @@ func _save_measure(completed: bool) -> void:
 	print("Informe: ", stem + ".json")
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if experiment_panel.visible:
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_Q:
 			_close()
