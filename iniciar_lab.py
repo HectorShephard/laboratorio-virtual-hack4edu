@@ -1,177 +1,106 @@
-"""Abre la camara desde Python y conecta Godot mediante un archivo temporal local."""
+﻿"""Supervisa la webcam en un proceso reiniciable y conecta Godot por archivo local."""
 from __future__ import annotations
-
 import argparse
-import json
-import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
-import threading
 import time
-import traceback
-
-import seguimiento
-
+import json
 ROOT = Path(__file__).resolve().parent
-
-
-class StateFile:
-    def __init__(self, destination, log_path):
-        self.destination = Path(destination)
-        self.log_path = Path(log_path)
-        self.counter = 0
-        self.synthetic = False
-        self.first_frame = True
-
-    def log(self, message):
-        print(message, flush=True)
-        with self.log_path.open("a", encoding="utf-8") as output:
-            output.write(time.strftime("%H:%M:%S ") + message + "\n")
-
-    def publish(self, packet):
-        self.counter += 1
-        kind = packet.get("type")
-        if kind == "ready":
-            self.synthetic = bool(packet.get("synthetic", False))
-            self.log("Camara abierta. Preparando seguimiento de manos...")
-        elif kind in ("status", "error"):
-            self.log(str(packet.get("message", "")))
-        elif kind == "frame" and self.first_frame:
-            self.first_frame = False
-            self.log("Seguimiento activo: se estan enviando posiciones a Godot.")
-        data = dict(packet, message_id=self.counter, synthetic=self.synthetic)
-        temporary = self.destination.with_suffix(".tmp")
-        temporary.write_text(json.dumps(data, separators=(",", ":"), allow_nan=False), encoding="utf-8")
-        # Windows puede mantener un archivo abierto durante su breve lectura.
-        for attempt in range(8):
-            try:
-                os.replace(temporary, self.destination)
-                return
-            except PermissionError:
-                time.sleep(.002)
-        if kind != "frame":
-            raise RuntimeError("No se pudo actualizar el archivo temporal de seguimiento.")
-
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--camera", type=int, default=0)
-    parser.add_argument("--width", type=int, default=640)
-    parser.add_argument("--height", type=int, default=480)
+    for flag, default in [("camera", 0), ("width", 640), ("height", 480)]:
+        parser.add_argument("--" + flag, type=int, default=default)
     parser.add_argument("--pinch", type=float, default=.35)
-    parser.add_argument("--godot", help="Ruta a otra copia de Godot para pruebas tecnicas")
-    parser.add_argument("--test-stream", action="store_true", help="Datos SIMULADOS; no prueba la camara")
-    parser.add_argument("--headless", action="store_true", help="Comprobacion tecnica sin ventana")
+    parser.add_argument("--godot")
+    parser.add_argument("--test-stream", action="store_true")
+    parser.add_argument("--headless", action="store_true")
     parser.add_argument("--test-exit", type=float, default=0)
-    parser.add_argument("--bench", action="store_true", help="Ir directamente a la mesa de pruebas")
+    parser.add_argument("--bench", action="store_true")
+    parser.add_argument("--audit-hands", action="store_true", help="Prueba guiada de dos manos reales, sin activar objetos")
+    parser.add_argument("--grip-check", action="store_true", help="Veinte intentos guiados de agarre con webcam y traza F3")
+    parser.add_argument("--assistant-check",action="store_true",help="Abre Química y el asistente para comprobar la interfaz")
     args = parser.parse_args()
-    if args.width < 320 or args.height < 240 or not .05 <= args.pinch <= 1:
-        parser.error("Resolucion minima 320x240 y umbral de pinza entre 0.05 y 1.")
-    executable = Path(args.godot) if args.godot else ROOT / "runtime" / "Godot.exe"
-    if not executable.is_file():
-        print("Falta Godot. Ejecuta primero 1_PREPARAR.bat.", flush=True)
-        return 1
     logs = ROOT / "registros"
     logs.mkdir(exist_ok=True)
-    log_path = logs / "inicio_directo.log"
-    log_path.write_text("Inicio directo del laboratorio con Python " + sys.version.split()[0] + "\n", encoding="utf-8")
-    process = None
-    quit_event = threading.Event()
-    paused = threading.Event()
-    session = {"stop": None}
-    old_emit = seguimiento.emit
-    result = 0
-    with tempfile.TemporaryDirectory(prefix="hack4edu_") as directory:
-        directory = Path(directory)
-        state_file = directory / "estado.json"
-        stop_file = directory / "salir.flag"
-        pause_file = directory / "pausa.flag"
-        transport = StateFile(state_file, log_path)
-        seguimiento.emit = transport.publish
-        transport.publish({"type": "status", "message": "Iniciando camara desde Python..."})
-        command = [str(executable), "--path", str(ROOT / "godot"), "--rendering-method", "gl_compatibility"]
+    worker = None
+    game = None
+    def stop_worker():
+        nonlocal worker
+        if worker is not None:
+            worker_stop.touch()
+            try:
+                worker.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                worker.kill()
+                worker.wait()
+            worker = None
+    with tempfile.TemporaryDirectory(prefix="hack4edu_") as folder, (logs / "inicio_directo.log").open("w", encoding="utf-8") as log, (logs / "godot_directo.log").open("w", encoding="utf-8") as game_log:
+        directory = Path(folder)
+        state = directory / "estado.json"
+        stop = directory / "salir.flag"
+        pause = directory / "pausa.flag"
+        retry = Path(str(state) + ".retry")
+        worker_stop = directory / "worker.stop"
+        command = [args.godot or str(ROOT / "runtime/Godot.exe"), "--path", str(ROOT / "godot"), "--rendering-method", "gl_compatibility"]
         if args.headless:
             command.append("--headless")
-        command += ["--", "--state-file", str(state_file), "--stop-file", str(stop_file), "--pause-file", str(pause_file)]
-        if args.test_stream:
-            command.append("--test-stream")
+        command += ["--", "--state-file", str(state), "--stop-file", str(stop), "--pause-file", str(pause)]
         if args.bench:
             command.append("--bench")
-        if args.test_exit > 0:
+        if args.audit_hands:
+            command.append("--audit-hands")
+        if args.grip_check:
+            command.append("--grip-check")
+        if args.assistant_check:
+            command.append("--assistant-check")
+        if args.test_stream:
+            command.append("--test-stream")
+        if args.test_exit:
             command += ["--test-exit", str(args.test_exit)]
-
-        def watch():
-            while not quit_event.wait(.05):
-                if process.poll() is not None or stop_file.exists():
-                    quit_event.set()
-                if pause_file.exists():
-                    paused.set()
-                else:
-                    paused.clear()
-                current = session["stop"]
-                if current is not None and (quit_event.is_set() or paused.is_set()):
-                    current.set()
-
+        worker_command = [sys.executable, "-u", str(ROOT / "seguimiento.py"), "--state-file", str(state), "--stop-file", str(worker_stop)]
+        for key in ["camera", "width", "height", "pinch"]:
+            worker_command += ["--" + key, str(getattr(args, key))]
+        if args.test_stream:
+            worker_command.append("--test-stream")
         try:
-            with (logs / "godot_directo.log").open("w", encoding="utf-8") as godot_log:
-                process = subprocess.Popen(command, cwd=ROOT, stdin=subprocess.DEVNULL,
-                                           stdout=godot_log, stderr=subprocess.STDOUT)
-                watcher = threading.Thread(target=watch, daemon=True)
-                watcher.start()
-                failed = False
-                while not quit_event.is_set():
-                    if paused.is_set():
-                        failed = False
-                        quit_event.wait(.1)
-                        continue
-                    if failed:
-                        quit_event.wait(.1)
-                        continue
-                    capture_stop = threading.Event()
-                    session["stop"] = capture_stop
-                    try:
-                        if args.test_stream:
-                            seguimiento.fake_stream(capture_stop)
-                        else:
-                            # Se llama a run, no a main: no se usa stdin ni un proceso hijo oculto.
-                            seguimiento.run(args, capture_stop)
-                    except Exception as exc:
-                        if not paused.is_set() and not quit_event.is_set():
-                            transport.publish({"type": "error", "message": str(exc) or "No se pudo abrir la camara."})
-                            transport.log("Usa Comparar con raton y vuelve a la camara para reintentar.")
-                            with log_path.open("a", encoding="utf-8") as output:
-                                traceback.print_exc(file=output)
-                            failed = True
-                    finally:
-                        capture_stop.set()
-                        session["stop"] = None
-                watcher.join(timeout=1)
-        except KeyboardInterrupt:
-            result = 0
-        except Exception as exc:
-            transport.log("ERROR al iniciar: " + str(exc))
-            result = 1
-        finally:
-            quit_event.set()
-            current = session["stop"]
-            if current is not None:
-                current.set()
-            seguimiento.emit = old_emit
-            if process is not None and process.poll() is None:
+            game = subprocess.Popen(command, cwd=ROOT, stdout=game_log, stderr=subprocess.STDOUT)
+            failed = False
+            last_status = ""
+            while game.poll() is None and not stop.exists():
+                if retry.exists():
+                    stop_worker()
+                    retry.unlink(missing_ok=True)
+                    failed = False
+                if pause.exists():
+                    stop_worker()
+                    failed = False
+                elif worker is None and not failed:
+                    worker_stop.unlink(missing_ok=True)
+                    state.write_text(json.dumps({"type": "status", "message": "Iniciando Python..."}), encoding="utf-8")
+                    worker = subprocess.Popen(worker_command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+                elif worker is not None and worker.poll() is not None:
+                    failed = True
+                    worker = None
                 try:
-                    process.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    process.terminate()
-                    try:
-                        process.wait(timeout=2)
-                    except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait()
-    print("Laboratorio cerrado.", flush=True)
-    return result
-
+                    packet = json.loads(state.read_text(encoding="utf-8"))
+                    status = packet.get("message", "Enviando fotogramas a Godot" if packet.get("type") == "frame" else "Cámara abierta")
+                    if status != last_status:
+                        print(status, flush=True)
+                        log.write(time.strftime("%H:%M:%S ") + status + "\n")
+                        log.flush()
+                        last_status = status
+                except (OSError, ValueError):
+                    pass
+                time.sleep(.05)
+        finally:
+            stop_worker()
+            if game is not None and game.poll() is None:
+                game.terminate()
+                game.wait(timeout=5)
+    return 0
 
 if __name__ == "__main__":
     raise SystemExit(main())

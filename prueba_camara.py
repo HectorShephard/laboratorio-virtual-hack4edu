@@ -1,4 +1,4 @@
-"""Prueba local de seguimiento de UNA mano y agarre 2D para Hack4Edu.
+"""Prueba local de seguimiento de DOS manos y agarre 2D para Hack4Edu.
 
 No graba ni transmite imagenes. Solo guarda metricas numericas al medir.
 """
@@ -60,11 +60,9 @@ def load_dependencies():
 
 
 def pinch_ratio(points, width, height):
-    """Distancia pulgar-indice dividida por ancho de palma, en pixeles."""
-    def distance(a, b):
-        return math.hypot((points[a].x - points[b].x) * width,
-                          (points[a].y - points[b].y) * height)
-    return distance(4, 8) / max(distance(5, 17), 1.0)
+    """Compatibilidad 2D con las mismas referencias robustas de palma."""
+    from hand_geometry import pinch_measure
+    return pinch_measure(points,width,height)['ratio']
 
 
 class Interaction:
@@ -164,117 +162,99 @@ def open_camera(cv2, index, width, height):
 
 
 def run(args):
+    from hand_pipeline import HandPipeline
     cv2, mp, np = load_dependencies()
-    model = ensure_model()
     from mediapipe.tasks import python
     from mediapipe.tasks.python import vision
+    model = ensure_model()
     options = vision.HandLandmarkerOptions(
         base_options=python.BaseOptions(model_asset_buffer=model.read_bytes()),
-        running_mode=vision.RunningMode.VIDEO, num_hands=1,
-        min_hand_detection_confidence=0.5, min_hand_presence_confidence=0.5,
-        min_tracking_confidence=0.5)
+        running_mode=vision.RunningMode.VIDEO, num_hands=2,
+        min_hand_detection_confidence=.5, min_hand_presence_confidence=.5,
+        min_tracking_confidence=.5)
     if args.check:
         with vision.HandLandmarker.create_from_options(options) as detector:
-            result = detector.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB,
-                                                       data=np.zeros((480, 640, 3), dtype=np.uint8)), 0)
+            result=detector.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB,
+                data=np.zeros((480,640,3),dtype=np.uint8)),0)
             assert not result.hand_landmarks
-        print("OK: dependencias y modelo funcionan. Falta probar tu camara.")
+        print("OK: dependencias, modelo y detector de DOS manos. Falta probar la camara.")
         return
-    capture, first = open_camera(cv2, args.camera, args.width, args.height)
-    height, width = first.shape[:2]
-    center, radius = (width * .68, height * .62), max(24, min(width, height) // 12)
-    interaction = Interaction(args.pinch)
-    config = {"python": platform.python_version(), "sistema": platform.platform(),
-              "mediapipe": mp.__version__, "opencv": cv2.__version__,
-              "camara_indice": args.camera, "ancho_real": width, "alto_real": height,
-              "umbral_pinza": args.pinch, "manos": 1, "modelo_sha256": sha256(model)}
-    rows, measure_start, before = [], None, (0, 0, 0)
-    notice = "ESPACIO: medir 60 s | Q: salir | R: centrar ficha"
-    frames, display_fps, fps_start = 0, 0, time.perf_counter()
-    start = time.perf_counter()
-    timestamp = -1
-    pending = first
-    window = "Hack4Edu - prueba local de manos"
-    cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(window, max(800, width), max(600, height))
-    print("Muestra UNA mano. Haz pinza sobre la ficha, muevela y abre los dedos para soltar.")
-    print("ESPACIO: medir 60 segundos. Q/ESC: salir y guardar una medicion parcial.")
+    capture,first=open_camera(cv2,args.camera,args.width,args.height)
+    height,width=first.shape[:2]
+    pipeline=HandPipeline(args.pinch)
+    owners=[False,False]
+    pressed=[False,False]
+    armed=[False,False]
+    seen=[None,None]
+    needs_open=[False,False]
+    offsets=[(0,0),(0,0)]
+    centers=[(width*.3,height*.65),(width*.7,height*.65)]
+    radius=max(24,min(width,height)//12)
+    rows=[]
+    start=time.perf_counter()
+    measure_start=None
+    timestamp=-1
+    pending=first
+    window="Hack4Edu - DOS manos / mismo detector del laboratorio"
+    cv2.namedWindow(window,cv2.WINDOW_NORMAL)
+    print("DOS manos: palma para apuntar, flexiona dedos para agarrar y abre para soltar. ESPACIO: traza; Q: salir.",flush=True)
     try:
         with vision.HandLandmarker.create_from_options(options) as detector:
             while True:
                 if pending is None:
-                    ok, frame = capture.read()
-                    if not ok:
-                        raise RuntimeError("Se interrumpio la captura de camara.")
-                else:
-                    frame, pending = pending, None
-                frame = cv2.flip(frame, 1)
-                rgb = np.ascontiguousarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                timestamp = max(timestamp + 1, int((time.perf_counter() - start) * 1000))
-                infer_start = time.perf_counter()
-                result = detector.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb), timestamp)
-                inference_ms = (time.perf_counter() - infer_start) * 1000
-                ratio, raw_cursor = None, None
-                if result.hand_landmarks:
-                    points = result.hand_landmarks[0]
-                    coords = [(int(p.x * width), int(p.y * height)) for p in points]
-                    for a, b in CONNECTIONS:
-                        cv2.line(frame, coords[a], coords[b], (80, 220, 80), 2, cv2.LINE_AA)
-                    for p in coords:
-                        cv2.circle(frame, p, 4, (80, 240, 255), -1)
-                    ratio = pinch_ratio(points, width, height)
-                    raw_cursor = ((coords[4][0] + coords[8][0]) / 2,
-                                  (coords[4][1] + coords[8][1]) / 2)
-                center = interaction.update(raw_cursor, ratio, center, radius, width, height)
-                now = time.perf_counter()
-                frames += 1
-                if now - fps_start >= .5:
-                    display_fps = frames / (now - fps_start)
-                    frames, fps_start = 0, now
-                if measure_start is not None:
-                    elapsed = now - measure_start
-                    rows.append({"segundo": round(elapsed, 4), "mano_detectada": int(raw_cursor is not None),
-                                 "inferencia_ms": round(inference_ms, 3),
-                                 "razon_pinza": round(ratio, 4) if ratio is not None else "",
-                                 "pinza_cerrada": int(interaction.closed), "objeto_agarrado": int(interaction.held)})
-                    if elapsed >= 60:
-                        save_report(rows, elapsed, config, before, interaction, True)
-                        measure_start, rows = None, []
-                        notice = "Informe guardado en resultados. ESPACIO: repetir"
-                cx, cy = map(int, center)
-                color = (80, 220, 80) if interaction.held else (245, 170, 40)
-                cv2.circle(frame, (cx, cy), radius, color, -1, cv2.LINE_AA)
-                cv2.putText(frame, "FICHA", (cx - 25, cy + 5), cv2.FONT_HERSHEY_SIMPLEX, .45, (20, 20, 20), 1)
-                if interaction.cursor is not None:
-                    cursor = tuple(map(int, interaction.cursor))
-                    cv2.circle(frame, cursor, 10, (255, 255, 255), 2, cv2.LINE_AA)
-                cv2.rectangle(frame, (0, 0), (width, 92), (25, 25, 25), -1)
-                state = "SIN MANO" if raw_cursor is None else ("PINZA" if interaction.closed else "SIN PINZA")
-                cv2.putText(frame, f"{state} | FPS: {display_fps:.1f} | IA: {inference_ms:.1f} ms", (10, 22),
-                            cv2.FONT_HERSHEY_SIMPLEX, .52, (255, 255, 255), 1, cv2.LINE_AA)
-                elapsed_label = f"Midiendo: {int(now - measure_start)}/60 s" if measure_start is not None else notice
-                cv2.putText(frame, elapsed_label, (10, 47), cv2.FONT_HERSHEY_SIMPLEX, .43, (180, 235, 255), 1, cv2.LINE_AA)
-                cv2.putText(frame, f"Pinzas: {interaction.pinches} | Agarres: {interaction.grabs} | Sueltas: {interaction.releases}",
-                            (10, 71), cv2.FONT_HERSHEY_SIMPLEX, .48, (255, 255, 255), 1, cv2.LINE_AA)
-                cv2.imshow(window, frame)
-                key = cv2.waitKey(1) & 0xFF
-                if key in (ord("q"), ord("Q"), 27):
-                    break
-                if cv2.getWindowProperty(window, cv2.WND_PROP_VISIBLE) < 1:
-                    break
-                if key == ord(" "):
+                    ok,frame=capture.read()
+                    if not ok: raise RuntimeError("Se interrumpio la captura de camara.")
+                else: frame,pending=pending,None
+                now=time.perf_counter()
+                timestamp=max(timestamp+1,int(now*1000))
+                rgb=np.ascontiguousarray(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB))
+                result=detector.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB,data=rgb),timestamp)
+                detections=[]
+                for i,(points,categories) in enumerate(zip(result.hand_landmarks,result.handedness)):
+                    category=categories[0]
+                    detections.append(dict(points=points,world=result.hand_world_landmarks[i],
+                        label=category.category_name,score=category.score,wrist=[1-points[0].x,points[0].y]))
+                hands=pipeline.process(detections,now,width,height)
+                frame=cv2.flip(frame,1)
+                for hand in hands:
+                    id=hand['id']
+                    color=(80,190,245) if id==0 else (240,200,80)
+                    if not hand['present'] or not hand.get('gesture_valid',True):
+                        if seen[id] is not None and now-seen[id]>.55:
+                            owners[id]=False
+                            needs_open[id]=True
+                    else:
+                        seen[id]=now
+                        cursor=tuple(max(0,min(1,(p-.1)/.8))*size for p,size in zip(hand['cursor'],(width,height)))
+                        if hand['hand_open']: needs_open[id]=False
+                        if hand['flexed'] and not needs_open[id] and not owners[id]:
+                            if math.dist(cursor,centers[id])<radius+22:
+                                owners[id]=True
+                                offsets[id]=tuple(c-p for c,p in zip(centers[id],cursor))
+                        if hand['hand_open']: owners[id]=False
+                        if owners[id]: centers[id]=tuple(p+d for p,d in zip(cursor,offsets[id]))
+                        pressed[id]=hand['pinched']
+                        for a,b in CONNECTIONS:
+                            p,q=hand['landmarks'][a],hand['landmarks'][b]
+                            cv2.line(frame,(int(p[0]*width),int(p[1]*height)),(int(q[0]*width),int(q[1]*height)),color,2)
+                        cv2.circle(frame,tuple(map(int,cursor)),12,color,2)
+                        text=f"ID {id} {hand['flex_state']} votos {hand['flexion']['bent_votes']}/{hand['flexion']['open_votes']}"
+                        cv2.putText(frame,text,(8,25+id*25),cv2.FONT_HERSHEY_SIMPLEX,.45,color,1)
+                    cv2.circle(frame,tuple(map(int,centers[id])),radius,color,3 if owners[id] else 1)
                     if measure_start is not None:
-                        save_report(rows, now - measure_start, config, before, interaction, False)
-                    rows, measure_start = [], time.perf_counter()
-                    before = (interaction.pinches, interaction.grabs, interaction.releases)
-                if key in (ord("r"), ord("R")):
-                    center = (width * .68, height * .62)
-                    interaction.held = False
+                        rows.append(dict(seconds=now-measure_start,hand=hand))
+                cv2.imshow(window,frame)
+                if args.test_exit>0 and now-start>=args.test_exit:break
+                key=cv2.waitKey(1)&255
+                if key in (ord('q'),27) or cv2.getWindowProperty(window,cv2.WND_PROP_VISIBLE)<1:break
+                if key==ord(' '):measure_start=now
     finally:
         capture.release()
         cv2.destroyAllWindows()
-        if measure_start is not None and rows:
-            save_report(rows, time.perf_counter() - measure_start, config, before, interaction, False)
+        output=ROOT/'registros'/'camara_sola_control.json'
+        output.parent.mkdir(exist_ok=True)
+        output.write_text(json.dumps(dict(num_hands=2,frames=rows),ensure_ascii=False),encoding='utf-8')
+        print("OK: camara real, dos IDs y razones por representacion. Traza numerica:",output,flush=True)
 
 
 def main():
@@ -282,8 +262,9 @@ def main():
     parser.add_argument("--camera", type=int, default=0, help="Indice de camara, normalmente 0")
     parser.add_argument("--width", type=int, default=640)
     parser.add_argument("--height", type=int, default=480)
-    parser.add_argument("--pinch", type=float, default=.35, help="Umbral de pinza relativo al ancho de palma")
+    parser.add_argument("--pinch", type=float, default=.35, help="Sensibilidad relativa: .35 es base; pinza suave 2D .55/.80 y 3D .50/.75")
     parser.add_argument("--check", action="store_true", help="Verifica dependencias y modelo sin abrir la camara")
+    parser.add_argument("--test-exit", type=float, default=0, help="Cerrar la prueba tras N segundos de captura")
     parser.add_argument("--download-model", action="store_true", help="Descarga solo el modelo")
     args = parser.parse_args()
     if args.width < 320 or args.height < 240 or not 0.05 <= args.pinch <= 1.0:

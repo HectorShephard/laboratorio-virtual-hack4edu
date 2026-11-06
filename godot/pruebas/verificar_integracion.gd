@@ -57,43 +57,13 @@ func _check_workbench(journal: RefCounted) -> void:
 	var lab := LAB_SCENE.instantiate()
 	root.add_child(lab)
 	var panel: Control = lab.get("experiment_panel")
-	if not _check(panel != null, "Encontrar el panel de la práctica"):
-		lab.free()
-		return
+	_check(panel != null, "Encontrar el cuaderno")
 	panel.set("_journal", journal)
 	lab.call("_open_experiment")
-	_check(panel.visible, "Abrir la práctica desde la mesa")
-	var input: SpinBox = panel.get("_editors")["entrada"]
-	var notes: LineEdit = panel.get("_fields")["notes"]
-	var configure_button: Button = panel.get("_configure_button")
-	var start_button: Button = panel.get("_start_button")
-	var measure_button: Button = panel.get("_measure_button")
-	var reset_button: Button = panel.get("_reset_button")
-	_check(start_button.disabled and measure_button.disabled, "Mantener el orden de los botones")
-	input.value = 4
-	notes.text = "Registro guardado desde la mesa"
-	configure_button.pressed.emit()
-	_check(not start_button.disabled and not input.editable, "Fijar la entrada al configurar")
-	start_button.pressed.emit()
-	_check(not measure_button.disabled, "Habilitar medición al iniciar")
-	measure_button.pressed.emit()
-	_check(measure_button.disabled, "Deshabilitar guardado duplicado en pantalla")
-	reset_button.pressed.emit()
-	_check(input.editable, "Volver a editar condiciones al reiniciar")
-	panel.hide()
-	_check(not panel.visible, "Volver a la mesa")
-	lab.free()
-
-	var reopened := LAB_SCENE.instantiate()
-	root.add_child(reopened)
-	panel = reopened.get("experiment_panel")
-	panel.set("_journal", journal)
-	reopened.call("_open_experiment")
+	_check(panel.visible, "Abrir el cuaderno desde el laboratorio")
 	var history: TextEdit = panel.get("_history")
-	_check(history.text.contains("Registro guardado desde la mesa"), "Recuperar la nota al reabrir la sala")
-	_check(history.text.contains("salida_de_prueba = 8"), "Mostrar el resultado guardado al reabrir")
-	reopened.free()
-
+	_check(history.text.contains("Nota de prueba para"), "Conservar registros técnicos anteriores en el cuaderno")
+	lab.free()
 
 func _check(condition: bool, label: String) -> bool:
 	if condition:

@@ -1,0 +1,131 @@
+{
+  "failures": 0,
+  "input_limits": {
+    "bicarbonate_g": {
+      "default": 3.0,
+      "label": "Bicarbonato (g)",
+      "max": 20.0,
+      "min": 0.1,
+      "step": 0.1,
+      "unit": "g"
+    },
+    "capacity_ml": {
+      "default": 150.0,
+      "label": "Vaso (mL)",
+      "max": 500.0,
+      "min": 1.0,
+      "step": 1.0,
+      "unit": "mL"
+    },
+    "concentration": {
+      "default": 5.0,
+      "label": "Concentración (%)",
+      "max": 100.0,
+      "min": 0.1,
+      "step": 0.1,
+      "unit": "% m/v ácido acético"
+    },
+    "initial_ml": {
+      "default": 100.0,
+      "label": "Inicial (mL)",
+      "max": 500.0,
+      "min": 1.0,
+      "step": 1.0,
+      "unit": "mL"
+    },
+    "target_ml": {
+      "default": 25.0,
+      "label": "Dosis a verter (mL)",
+      "max": 500.0,
+      "min": 1.0,
+      "step": 1.0,
+      "unit": "mL"
+    }
+  },
+  "negative_rejected_by_model": true,
+  "records": [
+    {
+      "assumptions": "CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂. Reacción completa 1:1; vinagre al 5.0 % m/v. Estimación teórica.",
+      "conclusion": "",
+      "experiment_id": "vinagre-bicarbonato",
+      "hypothesis": "",
+      "lab1_session": "lab1-6aa188296a61005d",
+      "lab_completed": true,
+      "laboratory_id": "quimica-1",
+      "limiting_reagent": "Ácido acético del vinagre",
+      "model_version": "estequiometria-5mv-v1",
+      "notes": "",
+      "parameters": {
+        "acido_acetico_g_por_100ml": 5.0,
+        "bicarbonato_g": 5.0,
+        "capacidad_vaso_ml": 150.0,
+        "concentracion": 5.0,
+        "dosis_objetivo_ml": 50.0,
+        "etiqueta_frasco": "Left",
+        "etiqueta_vaso": "Right",
+        "liquido": "vinagre",
+        "mano_frasco": 0.0,
+        "mano_vaso": 1.0,
+        "porcentaje_vertido": 50.0,
+        "restante_ml": 50.0000000000008,
+        "unidad_concentracion": "% m/v ácido acético",
+        "vertido_ml": 50.0,
+        "vinagre_ml": 50.0,
+        "volumen_inicial_ml": 100.0
+      },
+      "quantity": "CO₂ teórico",
+      "question": "",
+      "run_id": "ensayo-1793939190358-9f7264f075795659",
+      "saved_at_utc": "2026-11-06T04:26:30Z",
+      "schema_version": 1.0,
+      "source": "simulation",
+      "unit": "mmol",
+      "validity": "estimación teórica",
+      "value": 41.6305868247519
+    },
+    {
+      "assumptions": "CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂. Reacción completa 1:1; vinagre al 5.0 % m/v. Estimación teórica.",
+      "conclusion": "",
+      "experiment_id": "vinagre-bicarbonato",
+      "hypothesis": "",
+      "lab1_session": "lab1-860e4fb74223d7b0",
+      "lab_completed": true,
+      "laboratory_id": "quimica-1",
+      "limiting_reagent": "Bicarbonato",
+      "model_version": "estequiometria-5mv-v1",
+      "notes": "",
+      "parameters": {
+        "acido_acetico_g_por_100ml": 5.0,
+        "bicarbonato_g": 3.0,
+        "capacidad_vaso_ml": 150.0,
+        "concentracion": 5.0,
+        "dosis_objetivo_ml": 50.0,
+        "etiqueta_frasco": "Right",
+        "etiqueta_vaso": "Left",
+        "liquido": "vinagre",
+        "mano_frasco": 1.0,
+        "mano_vaso": 0.0,
+        "porcentaje_vertido": 50.0,
+        "restante_ml": 50.0000000000008,
+        "unidad_concentracion": "% m/v ácido acético",
+        "vertido_ml": 50.0,
+        "vinagre_ml": 50.0,
+        "volumen_inicial_ml": 100.0
+      },
+      "quantity": "CO₂ teórico",
+      "question": "",
+      "run_id": "ensayo-1793939189246-2dc3b8d674fe74ea",
+      "saved_at_utc": "2026-11-06T04:26:29Z",
+      "schema_version": 1.0,
+      "source": "simulation",
+      "unit": "mmol",
+      "validity": "estimación teórica",
+      "value": 35.7113097718047
+    }
+  ],
+  "source": "Godot local, controles y manos simulados",
+  "zero_rejected_by_model": true,
+  "dialogue_checks": 45,
+  "dialogue_report": "registros/asistente-aceptacion.json",
+  "physical_webcam_limit": "Se verifico el arranque con asistente y 60 fotogramas reales. La interaccion humana completa con webcam queda pendiente."
+}

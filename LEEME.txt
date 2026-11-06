@@ -1,113 +1,91 @@
-CUARTO DE CIENCIAS - HACK4EDU
+GARAJE DE EXPERIMENTOS - HACK4EDU
 Duelistas del Tamarindo
 
-QUE CONTIENE
-Un primer cuarto 3D con suelo, paredes, techo, puerta, ventanas, estanteria,
-mesa central y zonas laterales de quimica, fisica y electricidad.
-Puedes recorrerlo y cambiar a la mesa para manipular el cubo con una mano.
-
-ACTUALIZAR LA INSTALACION QUE YA FUNCIONA
-1. Cierra el laboratorio y espera a que termine su consola.
-2. Abre el ZIP, entra en Prueba_Lab3D_Hack4Edu y copia su contenido a la carpeta
-   actual donde estan los archivos .bat. Acepta reemplazar archivos.
-3. Abre 2_PROBAR_LAB3D.bat. Reutiliza las dependencias y Godot que ya preparaste.
-4. Empezaras recorriendo el cuarto. Pulsa Tab para activar la mesa y las manos.
-El nuevo 5_IR_A_LA_MESA.bat empieza directamente en la mesa, como antes.
+VERSION ACTUAL
+Laboratorio 1 de vinagre y bicarbonato, dos manos independientes con cursores
+3D articulados, raton como respaldo, cuaderno persistente y asistente local de
+quimica. Se conservan las tres estaciones y la mesa de pruebas del cubo.
+README.md contiene la guia completa y los enlaces a los informes.
 
 INSTALACION EN UN EQUIPO NUEVO
-1. Extrae todo el ZIP en una carpeta. Usa Python 3.13, 3.12 o 3.11 de 64 bits.
-2. Ejecuta 1_PREPARAR.bat con internet. Crea un entorno separado, instala las
-   dependencias y descarga el modelo y Godot 4.7.2 portable desde fuentes oficiales.
-3. Abre 2_PROBAR_LAB3D.bat. No necesitas configurar el editor de Godot.
-En otra PC hay que preparar de nuevo; copiar .venv no crea Python portable.
+1. Descarga o clona el proyecto completo en una carpeta.
+2. Instala Python 3.13, 3.12 o 3.11 de 64 bits.
+3. Ejecuta 1_PREPARAR.bat con internet. Prepara .venv y descarga Godot y el
+   modelo de seguimiento. En otra PC hay que preparar de nuevo las dependencias.
+4. Ejecuta 2_PROBAR_LAB3D.bat para webcam o 7_RECORRER_LABORATORIO.bat para raton.
+No necesitas abrir el editor de Godot. Los recursos del garaje estan incluidos.
 
-MODO RECORRER LA SALA
-- WASD: caminar.
-- Haz clic dentro de la sala para mirar con el raton.
-- Esc: liberar el cursor.
-- Apunta a un modelo cercano y pulsa E para inspeccionarlo. Las flechas
-  izquierda y derecha giran el modelo.
-- Tab: ir a la mesa de pruebas.
-- Q o cerrar ventana: salir.
-7_RECORRER_LABORATORIO.bat abre la sala sin usar la webcam.
-Mientras recorres la sala, las manos quedan en pausa. Es normal que la camara
-no este activa hasta que entres a la mesa. El cambio puede tardar unos segundos
-en liberar o preparar el detector.
+ABRIR Y COMPLETAR EL LABORATORIO 1
+1. Selecciona Banco y Quimica en el HUD. Tambien: 1/2/3 para las vistas,
+   C para Quimica y B para Cuaderno.
+2. Elige las cantidades y pulsa Preparar vaso y ensayo. Valores iniciales:
+   frasco 100 mL, vaso 150 mL, vinagre 5 % m/v, bicarbonato 3 g, dosis 25 mL.
+3. Pulsa Anadir bicarbonato al vaso.
+4. Apunta con el centro de la palma al vaso o frasco y flexiona los dedos para
+   agarrarlo. No hace falta pinza ni cerrar el puno. Puedes entrar al area con
+   la mano ya flexionada. Cada mano mantiene su propio objeto. Abre para soltar.
+5. Acerca el pico al vaso hasta que su borde se resalte. Inclina la muneca unos
+   18 grados desde la postura de agarre. Al enderezarla hasta unos 9 grados,
+   alejar el frasco o abrir la mano se detiene el flujo. Acercarlo sin inclinar
+   solo lo deja listo. Mira los mL vertidos, restantes y la capacidad disponible.
+6. Suelta los recipientes y pulsa Observar reaccion. El resultado usa el volumen
+   realmente recibido. El CO2 es teorico en mmol; las burbujas son ilustrativas.
+7. Ver cuaderno, completa las notas y Anotar ensayo. Laboratorio completado
+   aparece solo cuando el cuaderno confirma el guardado. Despues puedes consultar
+   el registro o Repetir ensayo.
 
-MODO MESA DE PRUEBAS
-- Muestra UNA mano abierta, completa y con buena luz de frente.
-- Mueve el cursor blanco hasta el cubo verde.
-- Haz pinza con pulgar e indice para agarrarlo. El cubo se pone amarillo.
-- Muevelo al circulo y abre los dedos para soltarlo. Cae sobre la mesa.
-- R: volver a colocar el cubo en el inicio.
-- E o Tab: volver a recorrer el cuarto.
-- Espacio: medir durante 60 segundos y guardar JSON/CSV en resultados.
-- Comparar con raton: pausa la camara; agarras manteniendo clic izquierdo.
-- Volver a la camara: reabre MediaPipe.
-- Esc, Q o cerrar ventana: guardar una medicion parcial y salir.
-3_COMPARAR_RATON.bat permite ir directamente a la mesa sin usar la webcam.
+RATON Y BOTONES
+- Manten clic izquierdo sobre el cuerpo del recipiente para arrastrarlo.
+- Usa la rueda para inclinar/enderezar el frasco. Puedes dejar apoyado el vaso.
+- Pinza corta con pulgar e indice: activar un boton del HUD una sola vez.
+- El agarre de objetos usa flexion de dedos, independientemente de esa pinza.
+- Asistente de quimica abre preguntas, siguiente paso, resultado y Modo pruebas.
+  Cerrar o Esc aparta el panel. La conversacion nunca ejecuta acciones ni guarda.
+- El cuaderno conserva ensayos al cerrar el programa y reinicia el contexto del
+  asistente al cambiar de ensayo. Escribir en campos no activa atajos del juego.
+- Alcohol es solo practica de transferencia; no calcula una reaccion de CO2.
 
-QUE FUNCIONA Y QUE ES AMBIENTACION
-Puedes inspeccionar y girar el cohete, el instrumental y la maqueta del sapo.
-El agarre con la mano o el raton se prueba con el cubo de la mesa central.
-Todavia no simulan reacciones, circuitos ni experimentos cientificos.
-La mano controla X/Z sobre la mesa; al agarrar se eleva el cubo a una altura fija.
-Esta version no mide profundidad real de la mano ni incluye rotacion libre.
-Las proporciones del cuarto son provisionales para probar el espacio.
+PERDIDAS DE CAMARA
+Cada mano conserva por separado la ultima pose y el agarre hasta unos 550 ms.
+Sin datos nuevos se pausa el movimiento. Un chorro ya iniciado puede terminar
+con una cola de hasta 250 ms y volumen acotado, registrado una sola vez.
+Al vencer la tolerancia se suelta el objeto. Muestra la mano abierta antes de
+agarrar otra vez. Una pose retenida nunca inicia un agarre ni un vertido.
 
-PROTECCION DEL SEGUIMIENTO
-- Descarta saltos bruscos de posicion o tamano y valida una ubicacion nueva con
-  varias observaciones consistentes.
-- Durante una interrupcion breve, el cubo agarrado queda quieto.
-- Al recuperar la mano se reajusta el punto de agarre para evitar un salto.
-- Si la interrupcion supera 0.6 segundos, el cubo se suelta desde la ultima posicion
-  valida. Vuelve a mostrar la mano abierta antes de agarrarlo otra vez.
-Los movimientos muy rapidos pueden activar esta proteccion. La deteccion con
-los dedos ocultos sigue dependiendo de lo que la camara pueda ver.
+DIAGNOSTICO
+- Cierra otras aplicaciones que usen la webcam y revisa los permisos de Windows.
+- Cierra el laboratorio antes de ejecutar 4_PROBAR_CAMARA_SOLA.bat. Esta prueba
+  usa hasta dos manos y el mismo clasificador de flexion.
+- Para revisar dependencias: .venv\Scripts\python.exe prueba_camara.py --check
+- Para elegir otra camara: 2_PROBAR_LAB3D.bat --camera 1
+- Para probar el asistente: 2_PROBAR_LAB3D.bat --assistant-check --test-exit 10
+- Para agarre guiado: 2_PROBAR_LAB3D.bat --grip-check
+- F3 alterna el diagnostico de manos, candidatos y objetos agarrados.
+- El HUD indica detector, camara, espera o error y ofrece Reintentar webcam
+  o Webcam / raton. Los registros son registros/inicio_directo.log y
+  registros/godot_directo.log.
+- Compatibility requiere OpenGL 3.3 y controladores funcionales.
 
-MEDIR EL RESULTADO EN TU EQUIPO
-El panel de la mesa separa:
-- Entorno 3D (FPS): frecuencia de dibujo de Godot, con objetivo maximo de 60.
-- Seguimiento (Hz): resultados procesados por segundo en Python.
-- Lectura camara: imagenes leidas por segundo en el bucle, limitado tambien por
-  el procesamiento; no es una medida de la frecuencia fisica del sensor.
-- Inferencia (ms): tiempo del modelo, distinto del retraso total camara-pantalla.
-Haz un minuto con camara y otro con raton. Intenta 10 ciclos de agarrar, mover y
-soltar; cuenta los intentos y fallos manualmente para comparar.
-"datos_con_mano_pct" es presencia detectada, no precision. El CSV incluye
-"control_estable" y el JSON cuenta muestras descartadas por el filtro.
+MODOS ANTERIORES
+Tab alterna con la mesa de pruebas del cubo. 3_COMPARAR_RATON.bat y
+5_IR_A_LA_MESA.bat permiten comparar ese control. El garaje y el Laboratorio 1
+se recorren desde los botones de navegacion, Quimica y Cuaderno del HUD.
+6_VER_MODELOS_3D.bat conserva el visor de recursos cientificos.
 
-CONEXION LOCAL Y DATOS
-Python abre la camara y Godot. Solo las posiciones y estados se intercambian
-mediante un archivo JSON temporal local. No necesita internet durante el uso una
-vez preparado. No graba ni envia fotos o videos. El panel dibuja el esqueleto de
-la mano; no presenta una segunda ventana de video en el modo 3D.
-Al cerrar se eliminan los archivos temporales de la conexion.
+DATOS Y VERIFICACION
+Todo el uso y el asistente funcionan localmente tras preparar la instalacion.
+Python y Godot intercambian posiciones y estados en archivos temporales;
+no se guardan imagenes ni video. El cuaderno usa user://bitacora/ensayos.
+Dependencias, registros de diagnostico y resultados locales no se suben a Git.
 
-SI ALGO FALLA
-- Cierra Camara, Teams, Zoom, OBS y la prueba 2D antes de usar la webcam en 3D.
-- Revisa permisos de camara para aplicaciones de escritorio en Windows.
-- Para probar otra camara, abre CMD en esta carpeta y ejecuta:
-  2_PROBAR_LAB3D.bat --camera 1
-- Para solicitar otra resolucion:
-  2_PROBAR_LAB3D.bat --width 480 --height 360
-  El controlador puede elegir otra resolucion.
-- Para cambiar sensibilidad de pinza:
-  2_PROBAR_LAB3D.bat --pinch 0.45
-- 4_PROBAR_CAMARA_SOLA.bat abre la prueba 2D y guarda registros/camara_sola.log.
-- El arranque de Python queda en registros/inicio_directo.log y los mensajes de
-  Godot en registros/godot_directo.log. Comparte el texto si hay un error.
-- El renderizador Compatibility necesita OpenGL 3.3 y controladores funcionales.
-
-VALIDACION
-Se comprobo en Linux con Godot 4.7.2: recorrido, suelo, colisiones con mesa y
-paredes, alternancia de vistas, controles dentro de la ventana y proteccion de
-agarre. La conexion se probo con datos simulados, marcados como tales, y el modelo
-con una imagen oficial que sustituye la camara. No se ha accedido a tu webcam.
-La apariencia y la fluidez finales deben comprobarse en tu pantalla y Windows.
-
-FUENTES TECNICAS
-https://github.com/godotengine/godot/releases/tag/4.7.2-stable
-https://godotengine.org/license/
-https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/python
-https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html
+Godot local verifico el recorrido completo con manos simuladas y raton, dos
+ensayos, recuperacion del cuaderno y 45 consultas del asistente sin fallos.
+50 mL al 5 % con 3 g: 35.711 mmol teoricos, bicarbonato limitante.
+50 mL al 5 % con 5 g: 41.631 mmol teoricos, acido acetico limitante.
+Esta rama rechaza 0 mL y cantidades negativas.
+El arranque mas reciente del asistente recibio 60 fotogramas de webcam real.
+El recorrido con dos manos humanas, roles invertidos y el panel durante el
+agarre sigue pendiente de validacion presencial. Consulta:
+docs/ASISTENTE_QUIMICA.md
+docs/ASISTENTE_QUIMICA_VERIFICACION.json
+docs/MANO_FLEXIONADA_Y_CONTINUIDAD.md

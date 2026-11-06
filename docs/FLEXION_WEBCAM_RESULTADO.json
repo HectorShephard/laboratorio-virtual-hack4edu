@@ -1,0 +1,616 @@
+{
+  "source": "webcam real, 2_PROBAR_LAB3D.bat --grip-check",
+  "summary": {
+    "hands": {
+      "0": {
+        "accepted_frames": 547,
+        "accepted_jumps": 0,
+        "accepted_losses": 16,
+        "assigned_frames": 556,
+        "detector_label_changes": 15,
+        "epoch_changes": 17,
+        "frames": 1263,
+        "identity_label_changes": 0,
+        "raw_frames": 564,
+        "raw_jumps": 0,
+        "raw_losses": 15,
+        "rejections": 17,
+        "uncertain_frames": 8
+      },
+      "1": {
+        "accepted_frames": 471,
+        "accepted_jumps": 0,
+        "accepted_losses": 14,
+        "assigned_frames": 482,
+        "detector_label_changes": 3,
+        "epoch_changes": 16,
+        "frames": 1263,
+        "identity_label_changes": 0,
+        "raw_frames": 492,
+        "raw_jumps": 0,
+        "raw_losses": 19,
+        "rejections": 21,
+        "uncertain_frames": 10
+      }
+    },
+    "note": "Los cambios de etiqueta y de época no equivalen a intercambios físicos confirmados.",
+    "samples": 1263
+  },
+  "flexion_stats": {
+    "0": {
+      "valid_samples": 556,
+      "flexed": 497,
+      "opened": 10
+    },
+    "1": {
+      "valid_samples": 482,
+      "flexed": 400,
+      "opened": 10
+    }
+  },
+  "observed_captures": [
+    {
+      "seconds": 3.49725199999999,
+      "id": 1,
+      "object": "FrascoVinagre",
+      "flexed": true,
+      "pinched": false,
+      "flexion": {
+        "bent_votes": 2.0,
+        "fingers": [
+          {
+            "bent": false,
+            "dip": 41.7420770599665,
+            "mcp": 9.51534587439252,
+            "opened": false,
+            "pip": 24.3335461504254,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 14.4591591683565,
+            "mcp": 13.054380020652,
+            "opened": false,
+            "pip": 53.2165502745061,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 11.336373393392,
+            "mcp": 14.4304859937937,
+            "opened": false,
+            "pip": 56.3192189700255,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    },
+    {
+      "seconds": 5.89719733333332,
+      "id": 1,
+      "object": "Espatula",
+      "flexed": true,
+      "pinched": true,
+      "flexion": {
+        "bent_votes": 3.0,
+        "fingers": [
+          {
+            "bent": true,
+            "dip": 49.5853911173112,
+            "mcp": 23.6480122078949,
+            "opened": false,
+            "pip": 43.0459134523089,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 39.2390947708569,
+            "mcp": 37.5085788241601,
+            "opened": false,
+            "pip": 62.1572905971361,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 27.4153336068367,
+            "mcp": 34.8231720628176,
+            "opened": false,
+            "pip": 69.4610859498359,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    },
+    {
+      "seconds": 15.080274666667,
+      "id": 1,
+      "object": "FrascoVinagre",
+      "flexed": true,
+      "pinched": false,
+      "flexion": {
+        "bent_votes": 2.0,
+        "fingers": [
+          {
+            "bent": false,
+            "dip": 40.7303186951976,
+            "mcp": 10.3216815823368,
+            "opened": false,
+            "pip": 19.7169140157957,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 24.1382270626637,
+            "mcp": 8.32687223148957,
+            "opened": false,
+            "pip": 40.9646490705182,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 14.3578168208591,
+            "mcp": 2.84900084120371,
+            "opened": false,
+            "pip": 50.0883428120757,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    },
+    {
+      "seconds": 21.2802746666667,
+      "id": 1,
+      "object": "Espatula",
+      "flexed": true,
+      "pinched": true,
+      "flexion": {
+        "bent_votes": 1.0,
+        "fingers": [
+          {
+            "bent": false,
+            "dip": 36.1389072916847,
+            "mcp": 8.11217371657124,
+            "opened": false,
+            "pip": 24.4686628552316,
+            "valid": true
+          },
+          {
+            "bent": false,
+            "dip": 12.206501477329,
+            "mcp": 9.33143941994958,
+            "opened": false,
+            "pip": 34.7658365137833,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 28.0311775225628,
+            "mcp": 26.0686987553961,
+            "opened": false,
+            "pip": 50.2214140458307,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    },
+    {
+      "seconds": 22.1469413333334,
+      "id": 1,
+      "object": "FrascoVinagre",
+      "flexed": true,
+      "pinched": true,
+      "flexion": {
+        "bent_votes": 3.0,
+        "fingers": [
+          {
+            "bent": true,
+            "dip": 45.4969776553335,
+            "mcp": 35.9301525493096,
+            "opened": false,
+            "pip": 64.3459957864401,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 42.1873879844688,
+            "mcp": 43.1954984231895,
+            "opened": false,
+            "pip": 88.6114911990888,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 32.1922350444769,
+            "mcp": 56.0303503731349,
+            "opened": false,
+            "pip": 71.571095312361,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    },
+    {
+      "seconds": 28.546941333333,
+      "id": 0,
+      "object": "FrascoVinagre",
+      "flexed": true,
+      "pinched": false,
+      "flexion": {
+        "bent_votes": 2.0,
+        "fingers": [
+          {
+            "bent": false,
+            "dip": 34.1785537768825,
+            "mcp": 28.3208857337547,
+            "opened": false,
+            "pip": 38.7674691041147,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 14.1391313128765,
+            "mcp": 30.0148587845981,
+            "opened": false,
+            "pip": 50.9857675532789,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 23.0211722018626,
+            "mcp": 31.5040597373496,
+            "opened": false,
+            "pip": 48.6854491314662,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    },
+    {
+      "seconds": 29.8969413333329,
+      "id": 0,
+      "object": "Vaso",
+      "flexed": true,
+      "pinched": true,
+      "flexion": {
+        "bent_votes": 3.0,
+        "fingers": [
+          {
+            "bent": true,
+            "dip": 26.8915694135776,
+            "mcp": 41.8701983698634,
+            "opened": false,
+            "pip": 60.2277873458416,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 50.8905136944333,
+            "mcp": 69.724725337483,
+            "opened": false,
+            "pip": 81.2931075212543,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 56.6775468926434,
+            "mcp": 95.8413784097756,
+            "opened": false,
+            "pip": 67.232774157716,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    },
+    {
+      "seconds": 70.080274666664,
+      "id": 1,
+      "object": "FrascoVinagre",
+      "flexed": true,
+      "pinched": true,
+      "flexion": {
+        "bent_votes": 3.0,
+        "fingers": [
+          {
+            "bent": true,
+            "dip": 23.3151041978142,
+            "mcp": 34.0347562640958,
+            "opened": false,
+            "pip": 43.7795241620382,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 38.1835029756216,
+            "mcp": 33.7932106847281,
+            "opened": false,
+            "pip": 41.6907122582451,
+            "valid": true
+          },
+          {
+            "bent": true,
+            "dip": 34.8378184877729,
+            "mcp": 45.7008305112924,
+            "opened": false,
+            "pip": 47.0047612418493,
+            "valid": true
+          }
+        ],
+        "open_votes": 0.0,
+        "representation": "world3d",
+        "valid": true
+      }
+    }
+  ],
+  "control_file": "C:\\Users\\Administrator\\laboratorio-virtual-hack4edu\\registros\\agarre-control-2925.jsonl",
+  "raw_file": "C:\\Users\\Administrator\\laboratorio-virtual-hack4edu\\registros\\manos_juego-17848-2754.jsonl",
+  "guided": {
+    "attempts": [
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 1
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 2
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 3
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 4
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 5
+      },
+      {
+        "accepted": true,
+        "candidate_seen": true,
+        "close_seen": true,
+        "detected": true,
+        "failure": "",
+        "id": 0,
+        "orientation": "canto",
+        "success": true,
+        "target": "FrascoVinagre",
+        "trial": 6
+      },
+      {
+        "accepted": true,
+        "candidate_seen": true,
+        "close_seen": true,
+        "detected": true,
+        "failure": "",
+        "id": 0,
+        "orientation": "canto",
+        "success": true,
+        "target": "Vaso",
+        "trial": 7
+      },
+      {
+        "accepted": true,
+        "candidate_seen": true,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 8
+      },
+      {
+        "accepted": true,
+        "candidate_seen": true,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "Vaso",
+        "trial": 9
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 10
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 11
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 12
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 13
+      },
+      {
+        "accepted": true,
+        "candidate_seen": true,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 14
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 15
+      },
+      {
+        "accepted": true,
+        "candidate_seen": true,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 16
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_recovery",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "Vaso",
+        "trial": 17
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 18
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "Vaso",
+        "trial": 19
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 20
+      }
+    ],
+    "human_compliance": "sin confirmar",
+    "source": "webcam real, instrucciones guiadas",
+    "successes_id0": 2,
+    "successes_id1": 0
+  },
+  "limitations": "Physical handedness and compliance with guided poses not confirmed. Complete pouring with both physical hands remains pending."
+}

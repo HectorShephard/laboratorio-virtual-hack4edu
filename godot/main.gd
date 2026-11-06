@@ -3,22 +3,53 @@ extends Node3D
 const PreviewScript = preload("res://hand_preview.gd")
 const TrackingGuard = preload("res://tracking_guard.gd")
 const LabRoom = preload("res://lab_room.gd")
+const GarageChallenges = preload("res://garage_challenges.gd")
 const ExperimentPanel = preload("res://ui/experiment_panel.gd")
-const INK := Color("d9eaf0")
-const MUTED := Color("87a2af")
-const TEAL := Color("48d5bc")
+const Walnut = preload("res://ui/walnut_theme.gd")
+const INK := Color("f4ead5")
+const MUTED := Color("c8baa3")
+const TEAL := Color("e5ae58")
 const GOLD := Color("ffce73")
+const ChemistryPanel = preload("res://ui/chemistry_panel.gd")
+const GRAPHICS_FILE := "user://garaje_graficos.cfg"
 
 var base_dir: String = ProjectSettings.globalize_path("res://").trim_suffix("/").get_base_dir()
 var camera: Camera3D
 var room: LabRoom
 var player: CharacterBody3D
 var explore_camera: Camera3D
+var fixed_view := 0
+var view_buttons: Array[Button] = []
+var chemistry_panel: ChemistryPanel
+var chemistry_assistant:PanelContainer
+var chemistry_open_button:Button
+var notebook_open_button:Button
+var chemistry_assistant_button:Button
+var navigation_preview: Control
+var managed_bridge := false
+var received_frames := 0
+var hand_epoch := -1
+var hand_guards: Dictionary = {}
+var tracking_audit: RefCounted
+var audit_only := false
+var last_frame_stamp := -1.0
+var last_stream := ""
+var last_sequence := -1
+var tracking_status: Label
+var retry_button: Button
+var garage_pointer: Node
 var exploring := false
 var bench_start := false
-var station_ray: RayCast3D
-var focused_station := -1
-var inspecting_station := -1
+var challenges: GarageChallenges
+var garage_menu: PanelContainer
+var challenge_options: VBoxContainer
+var graphics_options: VBoxContainer
+var menu_title: Label
+var room_environment: Environment
+var work_lights: Array[SpotLight3D] = []
+var extra_lights := true
+var shadows := true
+var test_marks: Node3D
 var explore_hud: Control
 var crosshair: Label
 var explore_status: Label
@@ -83,8 +114,10 @@ var test_exit_after := 0.0
 var test_started := 0.0
 
 func _ready() -> void:
+	tracking_audit = preload("res://core/tracking_audit.gd").new(base_dir.path_join("registros"))
 	get_tree().auto_accept_quit = false
 	Engine.max_fps = 60
+	_load_graphics()
 	_build_world()
 	_build_hud()
 	var args := OS.get_cmdline_user_args()
@@ -126,6 +159,19 @@ func _ready() -> void:
 	if test_exit_after > 0:
 		test_started = Time.get_ticks_msec() / 1000.0
 		_start_measure()
+	if args.has("--audit-hands"):
+		var guide := preload("res://pruebas/hand_acceptance_guide.gd").new()
+		guide.lab = self
+		add_child(guide)
+	if args.has("--grip-check"):
+		var guide:=preload("res://pruebas/grip_check_guide.gd").new()
+		guide.lab=self
+		add_child(guide)
+	if args.has("--assistant-check"):
+		_open_chemistry()
+		_open_chemistry_assistant()
+		chemistry_assistant.ask("¿Qué hago ahora?")
+		print("ASISTENTE: ",chemistry_assistant.last_reply.text)
 
 func _material(color: Color) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
@@ -147,19 +193,32 @@ func _build_world() -> void:
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color("0b141e")
+	settings.background_color = Color("302a24")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	settings.ambient_light_color = Color("a5c7df")
-	settings.ambient_light_energy = 0.75
+	settings.ambient_light_color = Color("fff0d7")
+	room_environment = settings
 	environment.environment = settings
 	add_child(environment)
 	room = LabRoom.new()
 	add_child(room)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-52, -28, 0)
-	sun.light_energy = 1.1
+	sun.light_energy = .43
 	sun.shadow_enabled = false
 	add_child(sun)
+	for x in [-2.1, 2.1]:
+		var light := SpotLight3D.new()
+		light.light_color = Color("ffe4b9")
+		light.light_energy = 2.35
+		light.spot_range = 9.0
+		light.spot_angle = 49.0
+		light.spot_attenuation = .85
+		light.shadow_opacity = .84
+		add_child(light)
+		light.position = Vector3(x, 2.51, .98)
+		light.look_at(Vector3(x * .28, 0, -.23))
+		work_lights.append(light)
+	_apply_graphics()
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.size = 9.3
@@ -170,7 +229,13 @@ func _build_world() -> void:
 	_build_player()
 	var table := StaticBody3D.new()
 	add_child(table)
-	_box(table, Vector3(7.1, .18, 4.7), Vector3(0, -.09, 0), Color("203849"))
+	var top := _box(table, Vector3(7.1, .18, 4.7), Vector3(0, -.09, 0), Color("a7764a"))
+	top.material_override = room.surface(Color("a7764a"), "contrachapado_diff_1k.jpg", 2)
+	test_marks = Node3D.new()
+	add_child(test_marks)
+	challenges = GarageChallenges.new()
+	challenges.position.y = .012
+	add_child(challenges)
 	var collision := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
 	shape.size = Vector3(7.1, .18, 4.7)
@@ -178,12 +243,16 @@ func _build_world() -> void:
 	collision.position.y = -.09
 	table.add_child(collision)
 	for x in range(-6, 7):
-		_box(self, Vector3(.012, .008, 4.4), Vector3(x * .5, .006, 0), Color("2c4758"))
+		_box(test_marks, Vector3(.012, .008, 4.4), Vector3(x * .5, .006, 0), Color("65513e"))
 	for z in range(-4, 5):
-		_box(self, Vector3(6.8, .008, .012), Vector3(0, .007, z * .5), Color("2c4758"))
+		_box(test_marks, Vector3(6.8, .008, .012), Vector3(0, .007, z * .5), Color("65513e"))
 	for x in [-2.8, 2.8]:
 		for z in [-1.7, 1.7]:
-			_box(self, Vector3(.2, 1.0, .2), Vector3(x, -.65, z), Color("142633"))
+			_box(self, Vector3(.2, 1.0, .2), Vector3(x, -.65, z), Color("795338"))
+	_box(table, Vector3(6.23, .10, 3.74), Vector3(0, -.96, 0), Color("805b3b"))
+	for x in [-2.18, 2.18]:
+		_box(table, Vector3(.86, .30, .72), Vector3(x, -.755, 1.23), Color("625346"))
+		_box(table, Vector3(.27, .08, .045), Vector3(x, -.72, 1.60), Color("afa18b"))
 	var ring := MeshInstance3D.new()
 	var torus := TorusMesh.new()
 	torus.inner_radius = .56
@@ -194,7 +263,7 @@ func _build_world() -> void:
 	target_material = _material(GOLD)
 	ring.material_override = target_material
 	ring.position = Vector3(1.4, .035, -.45)
-	add_child(ring)
+	test_marks.add_child(ring)
 	cube = RigidBody3D.new()
 	cube.mass = .4
 	cube.linear_damp = 1.5
@@ -238,20 +307,15 @@ func _build_player() -> void:
 	explore_camera.fov = 72
 	explore_camera.position = Vector3(0, 1.65, 0)
 	player.add_child(explore_camera)
-	station_ray = RayCast3D.new()
-	station_ray.enabled = false
-	station_ray.target_position = Vector3(0, 0, -2.75)
-	station_ray.collide_with_areas = true
-	station_ray.add_exception(player)
-	explore_camera.add_child(station_ray)
 
 func _enter_explore() -> void:
 	if measure_start >= 0:
 		_save_measure(false)
 	_drop(false)
 	exploring = true
-	focused_station = -1
-	inspecting_station = -1
+	challenges.show()
+	cube.hide()
+	test_marks.hide()
 	hud.hide()
 	explore_hud.show()
 	pointer.visible = false
@@ -262,13 +326,17 @@ func _enter_explore() -> void:
 	explore_camera.current = true
 	room.set_workbench_view(false)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if not state_file.is_empty():
-		_write_flag(pause_file)
+	if not state_file.is_empty() and not mouse_mode:
+		DirAccess.remove_absolute(pause_file)
 	_update_ui(Time.get_ticks_msec() / 1000.0, false, false, false)
 
 func _enter_workbench() -> void:
 	exploring = false
 	explore_hud.hide()
+	garage_menu.hide()
+	challenges.hide()
+	cube.show()
+	test_marks.show()
 	hud.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	explore_camera.current = false
@@ -289,63 +357,47 @@ func _toggle_navigation() -> void:
 	else:
 		_enter_explore()
 
-func _physics_process(delta: float) -> void:
-	if player == null:
-		return
-	if not player.is_on_floor():
-		player.velocity.y -= 9.8 * delta
-	else:
-		player.velocity.y = 0
-	var direction := Vector3.ZERO
-	if exploring:
-		direction.x = float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A))
-		direction.z = float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W))
-		direction = direction.normalized().rotated(Vector3.UP, player.rotation.y)
-	player.velocity.x = move_toward(player.velocity.x, direction.x * 3.0, 16 * delta)
-	player.velocity.z = move_toward(player.velocity.z, direction.z * 3.0, 16 * delta)
-	player.move_and_slide()
-	if exploring:
-		_update_station_focus(delta)
-
-func _update_station_focus(delta: float) -> void:
-	station_ray.force_raycast_update()
-	var hit := station_ray.get_collider()
-	focused_station = int(hit.get_meta("station_index", -1)) if hit is Area3D else -1
-	if inspecting_station != focused_station:
-		inspecting_station = -1
-	if inspecting_station >= 0:
-		var turn := float(Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_LEFT))
-		room.station_models[inspecting_station].rotate_y(turn * 1.65 * delta)
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not exploring:
-		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		get_viewport().set_input_as_handled()
-	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		player.rotate_y(-event.screen_relative.x * .002)
-		explore_camera.rotation.x = clampf(explore_camera.rotation.x - event.screen_relative.y * .002, -1.05, 1.05)
-
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE and chemistry_assistant!=null and chemistry_assistant.visible:
+		chemistry_assistant.close_panel()
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventKey:
+		var focused:=get_viewport().gui_get_focus_owner()
+		if (focused is LineEdit or focused is TextEdit) and event.keycode!=KEY_ESCAPE:return
 	if experiment_panel != null and experiment_panel.visible:
-		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		if event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_ESCAPE or (event.keycode == KEY_B and not get_viewport().gui_get_focus_owner() is TextEdit)):
 			experiment_panel.hide()
 			get_viewport().set_input_as_handled()
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_E, KEY_TAB]:
-		if event.keycode == KEY_E and exploring:
-			if focused_station >= 0:
-				inspecting_station = -1 if inspecting_station == focused_station else focused_station
-			_update_explore_hud()
-		else:
-			_toggle_navigation()
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if event.keycode in [KEY_1, KEY_2, KEY_3]:
+		_set_fixed_view(event.keycode - KEY_1)
+		get_viewport().set_input_as_handled()
+		return
+	if event.keycode == KEY_B:
+		_open_experiment()
+		get_viewport().set_input_as_handled()
+		return
+	if event.keycode == KEY_C:
+		_open_chemistry()
+		get_viewport().set_input_as_handled()
+		return
+	if garage_menu.visible:
+		if event.keycode == KEY_ESCAPE:
+			garage_menu.hide()
+			get_viewport().set_input_as_handled()
+		return
+	if exploring and event.keycode in [KEY_E, KEY_F2]:
+		_open_garage_menu(event.keycode == KEY_F2)
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_TAB or (not exploring and event.keycode == KEY_E):
+		_toggle_navigation()
 		get_viewport().set_input_as_handled()
 
-func _panel(color: Color, radius: int = 14) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = color
-	style.set_corner_radius_all(radius)
+func _panel(_color: Color, _radius: int = 14) -> StyleBox:
+	var style := Walnut.panel()
 	style.content_margin_left = 18
 	style.content_margin_right = 18
 	style.content_margin_top = 16
@@ -362,10 +414,11 @@ func _label(text: String, font_size: int = 16, color: Color = INK) -> Label:
 func _button(text: String, callback: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
+	button.theme = Walnut.make_theme()
 	button.custom_minimum_size.y = 32
-	for state in {"normal": Color("263d4a"), "hover": Color("345462"), "pressed": Color("376e67")}:
-		var colors := {"normal": Color("263d4a"), "hover": Color("345462"), "pressed": Color("376e67")}
-		var style := _panel(colors[state], 9)
+	for state in {"normal": Color("263d4a"), "hover": Color("2c6262"), "pressed": Color("397d79")}:
+		var colors := {"normal": Color("263d4a"), "hover": Color("2c6262"), "pressed": Color("397d79")}
+		var style := Walnut.panel(Color("513b24") if state != "normal" else Color("28221c"), 2, state != "normal")
 		style.content_margin_top = 6
 		style.content_margin_bottom = 6
 		style.content_margin_left = 10
@@ -379,6 +432,7 @@ func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Control.new()
+	hud.theme = Walnut.make_theme()
 	hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(hud)
@@ -395,7 +449,7 @@ func _build_hud() -> void:
 	header.add_child(top)
 	top.add_child(_label("D U E L I S T A S   D E L   T A M A R I N D O", 11, TEAL))
 	top.add_child(_label("Tu laboratorio de ciencias", 26))
-	subtitle_label = _label("Cuarto de pruebas · mesa central · estaciones de ciencias", 14, MUTED)
+	subtitle_label = _label("Garaje de experimentos · banco central", 14, MUTED)
 	top.add_child(subtitle_label)
 	var side := PanelContainer.new()
 	side.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
@@ -429,7 +483,7 @@ func _build_hud() -> void:
 	column.add_child(_button("Explorar sala [Tab]", _toggle_navigation))
 	measure_button = _button("Medir 60 s [Espacio]", _start_measure)
 	column.add_child(measure_button)
-	experiment_button = _button("Práctica de prueba", _open_experiment)
+	experiment_button = _button("Cuaderno de hallazgos [B]", _open_experiment)
 	column.add_child(experiment_button)
 	note_label = _label("Señal local · Sin grabar video\nR: reiniciar  ·  Esc: salir", 11, MUTED)
 	note_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -446,13 +500,15 @@ func _build_hud() -> void:
 	bottom.add_child(instruction_label)
 	experiment_panel = ExperimentPanel.new()
 	experiment_panel.hide()
-	hud.add_child(experiment_panel)
+	layer.add_child(experiment_panel)
 	experiment_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	experiment_panel.offset_left = 24
 	experiment_panel.offset_top = 22
 	experiment_panel.offset_right = -24
 	experiment_panel.offset_bottom = -18
 	_build_explore_hud(layer)
+	_build_garage_menu(layer)
+	_build_fixed_controls(layer)
 
 func _build_explore_hud(layer: CanvasLayer) -> void:
 	explore_hud = Control.new()
@@ -461,7 +517,7 @@ func _build_explore_hud(layer: CanvasLayer) -> void:
 	explore_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	explore_hud.hide()
 
-	var nameplate := _label("  HACK4EDU  /  LABORATORIO DE CIENCIAS", 15)
+	var nameplate := _label("  HACK4EDU  /  GARAJE DE EXPERIMENTOS", 15)
 	explore_hud.add_child(nameplate)
 	nameplate.position = Vector2(20, 19)
 	nameplate.add_theme_color_override("font_shadow_color", Color("102833"))
@@ -488,37 +544,128 @@ func _build_explore_hud(layer: CanvasLayer) -> void:
 	strip.offset_top = -103
 	strip.offset_bottom = -18
 	strip.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	strip.add_theme_stylebox_override("panel", _panel(Color("13232fdd")))
+	strip.add_theme_stylebox_override("panel", _panel(Color("28241fee")))
 	var controls := VBoxContainer.new()
 	controls.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.add_child(controls)
 	explore_status = _label("", 16)
 	explore_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	controls.add_child(explore_status)
-	controls.add_child(_label("WASD  Caminar     Ratón  Mirar     Tab  Mesa de pruebas     Esc  Soltar cursor     Q  Salir", 13, MUTED))
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 10)
+	controls.add_child(row)
+	row.add_child(_button("Retos [E]", _open_garage_menu.bind(false)))
+	row.add_child(_button("Ajustes [F2]", _open_garage_menu.bind(true)))
+	row.add_child(_label("1 Entrada · 2 Banco · 3 Estante · B Cuaderno · C Química", 13, Color("ddd1bb")))
 
 func _update_explore_hud() -> void:
-	var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
-	crosshair.visible = captured
-	crosshair.modulate = TEAL if focused_station >= 0 else Color.WHITE
-	if inspecting_station >= 0:
-		var station: Dictionary = LabRoom.STATIONS[inspecting_station]
-		explore_status.text = "%s · %s  [← / →] Girar  [E] Cerrar" % [station.title, station.detail]
-	elif not captured:
-		explore_status.text = "Haz clic dentro de la sala para mirar a tu alrededor."
-	elif focused_station >= 0:
-		explore_status.text = "[E] Inspeccionar · " + str(LabRoom.STATIONS[focused_station].title)
+	crosshair.visible = false
+	if challenges.active == 0:
+		explore_status.text = "Banco libre · E: retos · C: química · B: cuaderno"
 	else:
-		explore_status.text = "Acércate a una estación y apunta al modelo."
+		explore_status.text = "%s — %s" % [GarageChallenges.TITLES[challenges.active], GarageChallenges.KITS[challenges.active]]
+	if not mouse_mode:
+		explore_status.text = "Palma: apuntar · Flexiona dedos: agarrar · Abre: soltar · Pinza corta: botón"
+
+func _build_garage_menu(layer: CanvasLayer) -> void:
+	garage_menu = PanelContainer.new()
+	garage_menu.theme = Walnut.make_theme()
+	layer.add_child(garage_menu)
+	garage_menu.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	garage_menu.offset_left = -225
+	garage_menu.offset_right = 225
+	garage_menu.offset_top = -145
+	garage_menu.offset_bottom = 145
+	garage_menu.grow_vertical = Control.GROW_DIRECTION_BOTH
+	garage_menu.add_theme_stylebox_override("panel", _panel(Color("302920"), 10))
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 10)
+	garage_menu.add_child(layout)
+	menu_title = _label("", 25, Color("f6dfb6"))
+	layout.add_child(menu_title)
+	challenge_options = VBoxContainer.new()
+	challenge_options.add_theme_constant_override("separation", 7)
+	layout.add_child(challenge_options)
+	for index in GarageChallenges.TITLES.size():
+		challenge_options.add_child(_button(GarageChallenges.TITLES[index], _select_challenge.bind(index)))
+	graphics_options = VBoxContainer.new()
+	graphics_options.add_theme_constant_override("separation", 8)
+	layout.add_child(graphics_options)
+	var lighting_toggle := CheckButton.new()
+	lighting_toggle.text = "Iluminación de trabajo"
+	lighting_toggle.button_pressed = extra_lights
+	lighting_toggle.toggled.connect(_set_extra_lights)
+	graphics_options.add_child(lighting_toggle)
+	var shadows_toggle := CheckButton.new()
+	shadows_toggle.text = "Sombras dinámicas"
+	shadows_toggle.button_pressed = shadows
+	shadows_toggle.toggled.connect(_set_shadows)
+	graphics_options.add_child(shadows_toggle)
+	var note := _label("Las sombras se aplican a las lámparas de trabajo.\nCon ambas opciones apagadas queda luz ambiental.", 14, Color("d9c9ad"))
+	graphics_options.add_child(note)
+	layout.add_child(_button("Volver al garaje [Esc]", garage_menu.hide))
+	garage_menu.hide()
+
+func _open_garage_menu(graphics: bool) -> void:
+	garage_pointer.cancel()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	menu_title.text = "Ajustes gráficos" if graphics else "Elige un reto"
+	graphics_options.visible = graphics
+	challenge_options.visible = not graphics
+	garage_menu.show()
+	_update_explore_hud()
+
+func _select_challenge(index: int) -> void:
+	if index == 2:
+		_open_chemistry()
+		return
+	garage_pointer.cancel()
+	chemistry_panel.hide()
+	challenges.select(index)
+	garage_menu.hide()
+	_update_explore_hud()
+
+func _load_graphics() -> void:
+	var config := ConfigFile.new()
+	if config.load(GRAPHICS_FILE) == OK:
+		extra_lights = bool(config.get_value("graficos", "luces", true))
+		shadows = bool(config.get_value("graficos", "sombras", true))
+
+func _set_extra_lights(value: bool) -> void:
+	extra_lights = value
+	_save_graphics()
+
+func _set_shadows(value: bool) -> void:
+	shadows = value
+	_save_graphics()
+
+func _save_graphics() -> void:
+	_apply_graphics()
+	var config := ConfigFile.new()
+	config.set_value("graficos", "luces", extra_lights)
+	config.set_value("graficos", "sombras", shadows)
+	if config.save(GRAPHICS_FILE) != OK:
+		push_warning("No se pudieron guardar los ajustes gráficos del garaje.")
+
+func _apply_graphics() -> void:
+	room_environment.ambient_light_energy = .43 if extra_lights else .83
+	for light in work_lights:
+		light.visible = extra_lights
+		light.shadow_enabled = extra_lights and shadows
 
 func _open_experiment() -> void:
-	if exploring or measure_start >= 0:
+	if measure_start >= 0:
 		return
+	garage_pointer.cancel()
 	_drop(false)
 	pointer.visible = false
 	pinch_armed = false
 	previous_pressed = false
 	cursor_initialized = false
+	chemistry_panel.hide()
+	garage_menu.hide()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	experiment_panel.open_panel()
 
 func _start_bridge() -> void:
@@ -528,6 +675,10 @@ func _start_bridge() -> void:
 	stderr_text = ""
 	ready_camera = false
 	packet = {}
+	last_frame_stamp = -1.0
+	last_packet_time = -100.0
+	last_state_text = ""
+	received_frames = 0
 	text_buffer = ""
 	var interpreter := OS.get_environment("HACK4EDU_PYTHON")
 	if interpreter.is_empty():
@@ -540,6 +691,18 @@ func _start_bridge() -> void:
 	arguments.append_array(camera_args)
 	if synthetic:
 		arguments.append("--test-stream")
+	# Windows: el mismo transporte local que el lanzador que abre la cámara bien.
+	if OS.get_name() == "Windows":
+		managed_bridge = true
+		var folder := base_dir.path_join("registros")
+		DirAccess.make_dir_recursive_absolute(folder)
+		state_file = folder.path_join("webcam-%s-%s.json" % [OS.get_process_id(), Time.get_ticks_msec()])
+		stop_file = state_file + ".stop"
+		arguments.append_array(["--state-file", state_file, "--stop-file", stop_file])
+		process_pid = OS.create_process(interpreter, arguments)
+		if process_pid <= 0:
+			error_message = "No se pudo iniciar el Python de .venv."
+		return
 	channel = OS.execute_with_pipe(interpreter, arguments, false)
 	if channel.is_empty():
 		error_message = "No se pudo iniciar Python. Revisa 1_PREPARAR.bat."
@@ -651,8 +814,60 @@ func _receive(data: Dictionary) -> void:
 		return
 	if data.get("type", "") != "frame":
 		return
+	var stamp := float(data.get("captured_unix", 0))
+	if stamp <= last_frame_stamp or Time.get_unix_time_from_system() - stamp > .5:
+		return
+	if data.has("stream_id"):
+		var stream: String=str(data.stream_id)
+		if stream==last_stream and int(data.get("seq",-1))<=last_sequence:return
+		if stream!=last_stream:
+			if not last_stream.is_empty():garage_pointer.cancel()
+			hand_guards.clear()
+			last_stream=stream
+		last_sequence=int(data.get("seq",-1))
+	last_frame_stamp = stamp
+	received_frames += 1
+	ready_camera = true
+	error_message = ""
+	if received_frames % 60 == 0:
+		print("Webcam: %d fotogramas nuevos recibidos; garaje=%s" % [received_frames, exploring])
 	last_packet_time = Time.get_ticks_msec() / 1000.0
-	packet = data.duplicate()
+	packet = data.duplicate(true)
+	if data.has("hands"):
+		var any_present := false
+		var detected_ids := PackedStringArray()
+		for hand in packet.hands:
+			var id := int(hand.id)
+			if id<0 or id>1: continue
+			hand["detector_present"] = bool(hand.get("present",false))
+			if not hand_guards.has(id):
+				hand_guards[id] = TrackingGuard.new()
+			var guard = hand_guards[id]
+			var hand_quality: Dictionary
+			if hand.get("present", false):
+				var xy: Array = hand.get("cursor", [.5, .5])
+				hand_quality = guard.evaluate(Vector2(xy[0], xy[1]), hand.get("landmarks", []), float(hand.get("sample_time",last_packet_time)))
+			else:
+				hand_quality = guard.missing()
+			hand["present"] = bool(hand.get("present", false)) and bool(hand_quality.stable)
+			hand["sample_id"] = stamp
+			hand["received_at"] = last_packet_time
+			hand["camera_age_ms"] = maxf(0,(Time.get_unix_time_from_system()-stamp)*1000)
+			if hand.present:
+				any_present = true
+				detected_ids.append(str(id))
+		packet["present"] = any_present
+		tracking_audit.observe_frame(data,packet.hands)
+		packet["hand_count"] = detected_ids.size()
+		if received_frames % 60 == 0:
+			print("Manos detectadas con ID: ", ", ".join(detected_ids))
+		preview.active = any_present
+		preview.hands = packet.hands
+		preview.queue_redraw()
+		navigation_preview.hands = packet.hands
+		navigation_preview.active = any_present
+		navigation_preview.queue_redraw()
+		return
 	var detected := bool(data.get("present", false))
 	var quality: Dictionary
 	if detected:
@@ -662,15 +877,26 @@ func _receive(data: Dictionary) -> void:
 		quality = tracking_guard.missing()
 	packet["present"] = detected and bool(quality["stable"])
 	packet["unstable"] = detected and not bool(quality["stable"])
+	var epoch := int(data.get("hand_epoch", 0))
+	if not bool(packet["present"]) or (hand_epoch >= 0 and hand_epoch != epoch):
+		garage_pointer.cancel()
+	hand_epoch = epoch
 	if bool(quality["reacquired"]):
 		cursor_initialized = false
 		reanchor_on_valid = held
 	if bool(packet["present"]):
 		last_seen_time = last_packet_time
 	preview.points = packet.get("landmarks", [])
+	preview.hands = []
 	preview.active = bool(packet.get("present", false))
 	preview.closed = bool(packet.get("pinched", false))
 	preview.queue_redraw()
+	if navigation_preview != null:
+		navigation_preview.hands = []
+		navigation_preview.points = preview.points
+		navigation_preview.active = preview.active
+		navigation_preview.closed = preview.closed
+		navigation_preview.queue_redraw()
 	if measure_start >= 0:
 		measure_packets.append({"segundo": last_packet_time - measure_start,
 			"mano": detected, "control_estable": bool(packet["present"]), "inferencia_ms": float(packet.get("inference_ms", 0)),
@@ -689,6 +915,10 @@ func _point_on_table(screen: Vector2) -> Vector3:
 
 func _process(delta: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
+	_read_bridge()
+	_check_tracking(now)
+	if not audit_only:
+		garage_pointer.update_hand(packet, not mouse_mode and now - last_packet_time < .35, delta)
 	if exploring:
 		ui_tick += delta
 		if ui_tick >= .12:
@@ -697,7 +927,6 @@ func _process(delta: float) -> void:
 		if test_exit_after > 0 and now - test_started >= test_exit_after:
 			_close()
 		return
-	_read_bridge()
 	if experiment_panel.visible:
 		return
 	var valid := false
@@ -856,6 +1085,14 @@ func _update_ui(now: float, valid: bool, pressed: bool, in_zone: bool) -> void:
 		instruction_label.text = "Muestra primero la mano abierta. Lleva el cursor al cubo y haz pinza para agarrarlo."
 
 func _stop_bridge() -> void:
+	if managed_bridge:
+		_write_flag(stop_file)
+		if process_pid > 0 and OS.is_process_running(process_pid):
+			OS.kill(process_pid)
+		process_pid = -1
+		state_file = ""
+		stop_file = ""
+		managed_bridge = false
 	if not state_file.is_empty():
 		_write_flag(stop_file if closing else pause_file)
 		ready_camera = false
@@ -879,6 +1116,7 @@ func _stop_bridge() -> void:
 	preview.queue_redraw()
 
 func _toggle_mode() -> void:
+	garage_pointer.cancel()
 	if measure_start >= 0:
 		_save_measure(false)
 	_drop(true)
@@ -889,9 +1127,7 @@ func _toggle_mode() -> void:
 	previous_pressed = false
 	if not mouse_mode:
 		if not state_file.is_empty():
-			DirAccess.remove_absolute(pause_file)
-			error_message = ""
-			bridge_status = "Reabriendo cámara…"
+			_retry_tracking()
 		else:
 			_start_bridge()
 
@@ -966,7 +1202,9 @@ func _save_measure(completed: bool) -> void:
 	print("Informe: ", stem + ".json")
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if experiment_panel.visible:
+	var focused:=get_viewport().gui_get_focus_owner()
+	if focused is LineEdit or focused is TextEdit:return
+	if experiment_panel.visible or garage_menu.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_Q:
@@ -977,13 +1215,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_start_measure()
 		elif event.keycode == KEY_ESCAPE:
 			if exploring:
-				inspecting_station = -1
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 				_update_explore_hud()
 			else:
 				_close()
 
 func _close() -> void:
+	tracking_audit.flush()
 	if closing:
 		return
 	closing = true
@@ -1005,5 +1243,159 @@ func _notification(what: int) -> void:
 		_close()
 
 func _exit_tree() -> void:
+	if tracking_audit != null:
+		tracking_audit.flush()
 	if process_pid > 0 and OS.is_process_running(process_pid):
 		OS.kill(process_pid)
+
+func _build_fixed_controls(layer: CanvasLayer) -> void:
+	var shell := PanelContainer.new()
+	layer.add_child(shell)
+	shell.position = Vector2(24, 46)
+	shell.add_theme_stylebox_override("panel", _panel(Color("172331ed"), 12))
+	var groups := HBoxContainer.new()
+	groups.add_theme_constant_override("separation", 20)
+	shell.add_child(groups)
+	var row := _control_group(groups, "NAVEGACIÓN")
+	for index in 3:
+		var button := _button(["1 · Entrada", "2 · Banco", "3 · Estante"][index], _set_fixed_view.bind(index))
+		row.add_child(button)
+		view_buttons.append(button)
+	var chemistry_group:=_control_group(groups,"QUÍMICA")
+	chemistry_open_button=_button("Química [C]",_open_chemistry)
+	chemistry_group.add_child(chemistry_open_button)
+	chemistry_assistant_button=_button("Asistente de química",_open_chemistry_assistant)
+	chemistry_assistant_button.hide()
+	chemistry_group.add_child(chemistry_assistant_button)
+	notebook_open_button=_button("Cuaderno [B]",_open_experiment)
+	_control_group(groups,"CUADERNO").add_child(notebook_open_button)
+	row = _control_group(groups, "ENTRADA")
+	row.add_child(_button("Webcam / ratón", _toggle_mode))
+	retry_button = _button("Reintentar webcam", _retry_tracking)
+	row.add_child(retry_button)
+	tracking_status = _label("", 14)
+	tracking_status.position = Vector2(24, 126)
+	tracking_status.custom_minimum_size.x = 1040
+	tracking_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tracking_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(tracking_status)
+	navigation_preview = PreviewScript.new()
+	layer.add_child(navigation_preview)
+	navigation_preview.position = Vector2(24, 570)
+	navigation_preview.size = Vector2(160, 95)
+	navigation_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	navigation_preview.hide()
+	chemistry_panel = ChemistryPanel.new()
+	chemistry_panel.lab = self
+	layer.add_child(chemistry_panel)
+	chemistry_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	chemistry_panel.offset_left = -370
+	chemistry_panel.offset_right = -24
+	chemistry_panel.offset_top = 175
+	chemistry_panel.offset_bottom = 590
+	chemistry_panel.mixed.connect(_chemistry_mixed)
+	experiment_panel.record_saved.connect(chemistry_panel.on_saved)
+	chemistry_assistant=preload("res://ui/chemistry_assistant.gd").new()
+	chemistry_assistant.provider=chemistry_panel.expert_snapshot
+	chemistry_assistant.available=chemistry_panel.assistant_available
+	chemistry_assistant.entry_button=chemistry_assistant_button
+	chemistry_assistant.notebook_entry=experiment_panel.assistant_button
+	experiment_panel.assistant_requested.connect(_open_chemistry_assistant)
+	layer.add_child(chemistry_assistant)
+	chemistry_panel.hide()
+	experiment_panel.move_to_front()
+	_set_fixed_view(0)
+	garage_pointer = preload("res://core/two_hand_controller.gd").new()
+	garage_pointer.lab = self
+	add_child(garage_pointer)
+
+func _set_fixed_view(index: int) -> void:
+	if garage_pointer != null:
+		garage_pointer.cancel()
+	if not exploring:
+		_enter_explore()
+	fixed_view = clampi(index, 0, 2)
+	explore_camera.top_level = true
+	explore_camera.rotation = Vector3.ZERO
+	var locations := [Vector3(5.0, 1.6, 5.7), Vector3(2.2, 2.7, 2.55), Vector3(-3.7, 1.0, -3.6)]
+	var targets := [Vector3(0, .2, -2), Vector3(0, .25, 0), Vector3(-4.35, .2, -5.93)]
+	explore_camera.projection = Camera3D.PROJECTION_ORTHOGONAL if fixed_view==1 else Camera3D.PROJECTION_PERSPECTIVE
+	explore_camera.size = 5.5
+	explore_camera.global_position = locations[fixed_view]
+	explore_camera.look_at(targets[fixed_view])
+	# La vista elevada usa el mismo corte de techo ya disponible en la mesa técnica.
+	room.set_workbench_view(fixed_view==1)
+	if fixed_view==1:
+		# Reserva el tercio derecho al panel sin modificar la captura de webcam.
+		explore_camera.global_position += explore_camera.global_basis.x * 1.3
+	_update_view_buttons()
+
+func _update_view_buttons() -> void:
+	for index in view_buttons.size():
+		view_buttons[index].text = ("● " if fixed_view == index else "") + ["1 · Entrada", "2 · Banco", "3 · Estante"][index]
+
+func _open_chemistry() -> void:
+	if not experiment_panel.pending.is_empty():
+		_open_experiment()
+		return
+	experiment_panel.hide()
+	_set_fixed_view(1)
+	var new_kit := challenges.active != 2
+	challenges.select(2)
+	if new_kit:
+		chemistry_panel.reset_for_new_kit()
+	garage_menu.hide()
+	chemistry_panel.show()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func _open_chemistry_assistant()->void:
+	chemistry_assistant.open_panel()
+
+func _retry_tracking() -> void:
+	garage_pointer.cancel()
+	mouse_mode = false
+	tracking_guard.reset()
+	last_frame_stamp = -1
+	last_packet_time = -100
+	packet = {}
+	last_state_text = ""
+	error_message = ""
+	bridge_status = "Reiniciando cámara…"
+	bridge_started = Time.get_ticks_msec() / 1000.0
+	if not managed_bridge and not state_file.is_empty():
+		DirAccess.remove_absolute(pause_file)
+		_write_flag(state_file + ".retry")
+	else:
+		_stop_bridge()
+		_start_bridge()
+
+func _check_tracking(now: float) -> void:
+	navigation_preview.visible = not mouse_mode and not experiment_panel.visible
+	if mouse_mode:
+		tracking_status.text = "Ratón: arrastra + rueda para inclinar · " + garage_pointer.selection_text()
+		return
+	if error_message.is_empty():
+		if last_packet_time > 0 and now - last_packet_time > 3:
+			error_message = "La webcam dejó de enviar fotogramas. Reintenta o usa ratón."
+		elif last_packet_time < 0 and now - bridge_started > 20:
+			error_message = "Tiempo de espera agotado: " + bridge_status + " Reintenta o usa ratón."
+	if not error_message.is_empty():
+		tracking_status.text = error_message
+	elif last_packet_time > 0:
+		tracking_status.text = ("%d mano(s) · Palma: apuntar · Flexiona: agarrar/mover · Muñeca: verter · Abre: soltar" % int(packet.get("hand_count", 1)) if bool(packet.get("present", false)) else "Webcam activa · Esperando manos") + "\n" + garage_pointer.hands_status()
+	else:
+		tracking_status.text = bridge_status
+
+func _chemistry_mixed(record: Dictionary) -> void:
+	if challenges.transfer.liquid == "vinagre":
+		challenges.start_bubbles()
+	experiment_panel.set_result(record)
+	explore_status.text = "Observa las burbujas. Abre B para anotar el CO₂ teórico." if challenges.transfer.liquid=="vinagre" else "Transferencia lista. Abre B para anotar el volumen."
+
+func _control_group(parent: Node, caption: String) -> HBoxContainer:
+	var column := VBoxContainer.new()
+	parent.add_child(column)
+	column.add_child(_label(caption, 11, MUTED))
+	var row := HBoxContainer.new()
+	column.add_child(row)
+	return row

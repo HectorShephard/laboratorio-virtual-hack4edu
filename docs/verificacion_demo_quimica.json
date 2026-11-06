@@ -1,0 +1,166 @@
+{
+  "viewport": [
+    1100,
+    720
+  ],
+  "mapping": "clamp((normalized - 0.1) / 0.8) * viewport",
+  "comparison": "Crudo y One Euro sobre exactamente las mismas muestras de webcam",
+  "real": [
+    {
+      "source": "registros\\estabilidad_una_mano.json",
+      "phase": "UNA MANO QUIETA (5 s)",
+      "frames": 149,
+      "detected_counts": {
+        "1": 149
+      },
+      "hands": {
+        "0": {
+          "raw": {
+            "samples": 149,
+            "rms_px": 2.97,
+            "step_p95_px": 3.813
+          },
+          "previous_exponential_replay": {
+            "samples": 149,
+            "rms_px": 2.602,
+            "step_p95_px": 1.207
+          },
+          "one_euro": {
+            "samples": 149,
+            "rms_px": 2.501,
+            "step_p95_px": 0.724
+          },
+          "epochs": 1
+        },
+        "1": {
+          "raw": {
+            "samples": 0,
+            "rms_px": null,
+            "step_p95_px": null
+          },
+          "previous_exponential_replay": {
+            "samples": 0,
+            "rms_px": null,
+            "step_p95_px": null
+          },
+          "one_euro": {
+            "samples": 0,
+            "rms_px": null,
+            "step_p95_px": null
+          },
+          "epochs": 0
+        }
+      },
+      "screen_order_changes": 0
+    },
+    {
+      "source": "registros\\estabilidad_despues.json",
+      "phase": "DOS MANOS QUIETAS (5 s)",
+      "frames": 149,
+      "detected_counts": {
+        "2": 149
+      },
+      "hands": {
+        "0": {
+          "raw": {
+            "samples": 149,
+            "rms_px": 2.371,
+            "step_p95_px": 2.689
+          },
+          "previous_exponential_replay": {
+            "samples": 149,
+            "rms_px": 2.129,
+            "step_p95_px": 0.805
+          },
+          "one_euro": {
+            "samples": 149,
+            "rms_px": 2.037,
+            "step_p95_px": 0.45
+          },
+          "epochs": 1
+        },
+        "1": {
+          "raw": {
+            "samples": 149,
+            "rms_px": 2.581,
+            "step_p95_px": 6.039
+          },
+          "previous_exponential_replay": {
+            "samples": 149,
+            "rms_px": 1.618,
+            "step_p95_px": 1.649
+          },
+          "one_euro": {
+            "samples": 149,
+            "rms_px": 1.36,
+            "step_p95_px": 0.964
+          },
+          "epochs": 1
+        }
+      },
+      "screen_order_changes": 0
+    },
+    {
+      "source": "registros\\estabilidad_despues.json",
+      "phase": "CRUZA LAS MANOS (5 s)",
+      "frames": 147,
+      "detected_counts": {
+        "2": 66,
+        "1": 80,
+        "0": 1
+      },
+      "hands": {
+        "0": {
+          "raw": {
+            "samples": 93,
+            "rms_px": 187.474,
+            "step_p95_px": 35.638
+          },
+          "previous_exponential_replay": {
+            "samples": 93,
+            "rms_px": 180.66,
+            "step_p95_px": 25.461
+          },
+          "one_euro": {
+            "samples": 93,
+            "rms_px": 180.349,
+            "step_p95_px": 27.222
+          },
+          "epochs": 3
+        },
+        "1": {
+          "raw": {
+            "samples": 119,
+            "rms_px": 181.45,
+            "step_p95_px": 37.337
+          },
+          "previous_exponential_replay": {
+            "samples": 119,
+            "rms_px": 177.924,
+            "step_p95_px": 33.167
+          },
+          "one_euro": {
+            "samples": 119,
+            "rms_px": 179.004,
+            "step_p95_px": 36.186
+          },
+          "epochs": 3
+        }
+      },
+      "screen_order_changes": 2
+    }
+  ],
+  "simulated": {
+    "object_swaps": 0,
+    "one_hand_loss_stops_flow": true,
+    "other_hand_remains_usable": true,
+    "mouse_poured_ml": 25,
+    "initial_ml": 100,
+    "remaining_ml": 75
+  },
+  "pending": [
+    "Confirmar visualmente identidad física al cruzar manos y después de oclusión completa",
+    "Recorrer el vertido completo con dos manos humanas; la prueba funcional se automatizó con señales simuladas"
+  ],
+  "initial_capture": "registros/estabilidad_antes.json: fase de una mano sin detecciones; fase de dos manos con movimiento, no comparable como reposo"
+}

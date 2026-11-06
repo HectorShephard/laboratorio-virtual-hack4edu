@@ -1,0 +1,204 @@
+{
+  "source": "webcam real y aceptación real de Godot",
+  "raw_file": "registros\\manos_juego-2028-2251.jsonl",
+  "summary": {
+    "hands": {
+      "0": {
+        "accepted_frames": 562,
+        "accepted_losses": 5,
+        "assigned_frames": 566,
+        "detector_label_changes": 14,
+        "epoch_changes": 2,
+        "frames": 818,
+        "identity_label_changes": 0,
+        "raw_frames": 566,
+        "raw_jumps": 2,
+        "raw_losses": 2,
+        "rejections": 4,
+        "uncertain_frames": 0
+      },
+      "1": {
+        "accepted_frames": 412,
+        "accepted_losses": 4,
+        "assigned_frames": 417,
+        "detector_label_changes": 16,
+        "epoch_changes": 4,
+        "frames": 818,
+        "identity_label_changes": 0,
+        "raw_frames": 417,
+        "raw_jumps": 0,
+        "raw_losses": 4,
+        "rejections": 5,
+        "uncertain_frames": 0
+      }
+    },
+    "note": "Los cambios de etiqueta y de época no equivalen a intercambios físicos confirmados.",
+    "samples": 818
+  },
+  "accepted_jumps_recomputed": {
+    "0": 0,
+    "1": 0
+  },
+  "phases": {
+    "libre": {
+      "0": {
+        "frames": 10,
+        "raw": 0,
+        "assigned": 0,
+        "accepted": 0,
+        "events": {},
+        "detector_labels": {},
+        "identity_labels": {},
+        "accepted_over_assigned_pct": null
+      },
+      "1": {
+        "frames": 10,
+        "raw": 0,
+        "assigned": 0,
+        "accepted": 0,
+        "events": {},
+        "detector_labels": {},
+        "identity_labels": {},
+        "accepted_over_assigned_pct": null
+      }
+    },
+    "izquierda_sola": {
+      "0": {
+        "frames": 128,
+        "raw": 0,
+        "assigned": 0,
+        "accepted": 0,
+        "events": {},
+        "detector_labels": {},
+        "identity_labels": {},
+        "accepted_over_assigned_pct": null
+      },
+      "1": {
+        "frames": 128,
+        "raw": 128,
+        "assigned": 128,
+        "accepted": 128,
+        "events": {
+          "handedness_changed": 4
+        },
+        "detector_labels": {
+          "Right": 126,
+          "Left": 2
+        },
+        "identity_labels": {
+          "Right": 128
+        },
+        "accepted_over_assigned_pct": 100.0
+      }
+    },
+    "derecha_sola": {
+      "0": {
+        "frames": 124,
+        "raw": 124,
+        "assigned": 124,
+        "accepted": 124,
+        "events": {},
+        "detector_labels": {
+          "Right": 124
+        },
+        "identity_labels": {
+          "Right": 124
+        },
+        "accepted_over_assigned_pct": 100.0
+      },
+      "1": {
+        "frames": 124,
+        "raw": 0,
+        "assigned": 0,
+        "accepted": 0,
+        "events": {},
+        "detector_labels": {},
+        "identity_labels": {},
+        "accepted_over_assigned_pct": null
+      }
+    },
+    "dos_cruzando": {
+      "0": {
+        "frames": 127,
+        "raw": 127,
+        "assigned": 127,
+        "accepted": 124,
+        "events": {
+          "game_loss": 3,
+          "handedness_changed": 11,
+          "raw_jump": 1
+        },
+        "detector_labels": {
+          "Right": 93,
+          "Left": 34
+        },
+        "identity_labels": {
+          "Right": 127
+        },
+        "accepted_over_assigned_pct": 97.64
+      },
+      "1": {
+        "frames": 127,
+        "raw": 72,
+        "assigned": 72,
+        "accepted": 72,
+        "events": {
+          "handedness_changed": 3,
+          "raw_loss": 2,
+          "game_loss": 2,
+          "hand_epoch_changed": 2
+        },
+        "detector_labels": {
+          "Right": 65,
+          "Left": 7
+        },
+        "identity_labels": {
+          "Right": 72
+        },
+        "accepted_over_assigned_pct": 100.0
+      }
+    },
+    "una_sale": {
+      "0": {
+        "frames": 129,
+        "raw": 87,
+        "assigned": 87,
+        "accepted": 87,
+        "events": {
+          "handedness_changed": 2,
+          "raw_loss": 1,
+          "game_loss": 1,
+          "hand_epoch_changed": 1
+        },
+        "detector_labels": {
+          "Right": 84,
+          "Left": 3
+        },
+        "identity_labels": {
+          "Right": 87
+        },
+        "accepted_over_assigned_pct": 100.0
+      },
+      "1": {
+        "frames": 129,
+        "raw": 54,
+        "assigned": 54,
+        "accepted": 52,
+        "events": {
+          "handedness_changed": 4
+        },
+        "detector_labels": {
+          "Left": 51,
+          "Right": 3
+        },
+        "identity_labels": {
+          "Right": 54
+        },
+        "accepted_over_assigned_pct": 96.3
+      }
+    }
+  },
+  "physical_hand_confirmed": null,
+  "limitations": "Las fases son instrucciones visuales. Los cambios de etiqueta o de época no prueban un intercambio de identidad física. El vertido humano completo sigue pendiente.",
+  "same_rules_for_both": true
+}

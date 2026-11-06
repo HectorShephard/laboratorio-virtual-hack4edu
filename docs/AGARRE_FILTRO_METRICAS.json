@@ -1,0 +1,56 @@
+{
+  "source": "Replay de muestras de webcam previas; movimiento humano no confirmado como quieto",
+  "rows": [
+    {
+      "phase": 0,
+      "id": 0,
+      "samples": 1,
+      "raw_step_p95_px": null,
+      "previous_step_p95_px": null,
+      "min1_beta0_step_p95_px": null,
+      "min1_beta3_step_p95_px": null
+    },
+    {
+      "phase": 0,
+      "id": 1,
+      "samples": 127,
+      "raw_step_p95_px": 7.416,
+      "previous_step_p95_px": 4.722,
+      "min1_beta0_step_p95_px": 4.242,
+      "min1_beta3_step_p95_px": 4.646
+    },
+    {
+      "phase": 1,
+      "id": 0,
+      "samples": 113,
+      "raw_step_p95_px": 13.92,
+      "previous_step_p95_px": 14.982,
+      "min1_beta0_step_p95_px": 13.989,
+      "min1_beta3_step_p95_px": 14.308
+    },
+    {
+      "phase": 1,
+      "id": 1,
+      "samples": 145,
+      "raw_step_p95_px": 4.611,
+      "previous_step_p95_px": 1.719,
+      "min1_beta0_step_p95_px": 1.434,
+      "min1_beta3_step_p95_px": 1.527
+    }
+  ],
+  "response": [
+    {
+      "beta": 0,
+      "synthetic_step_90pct_ms": 400
+    },
+    {
+      "beta": 3,
+      "synthetic_step_90pct_ms": 67
+    }
+  ],
+  "selected": {
+    "min_cutoff": 1,
+    "beta": 3
+  },
+  "note": "El replay aísla el filtro. No incluye el render interpolado ni equivale a una medición física de latencia."
+}

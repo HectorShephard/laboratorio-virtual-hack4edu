@@ -8,7 +8,7 @@ if not exist ".venv\Scripts\python.exe" (
 )
 if not exist "registros" mkdir "registros"
 echo Cierra el laboratorio 3D y otras apps que usen la camara.
-echo Se abrira la misma prueba 2D que funciono antes.
+echo Se abrira la prueba de DOS manos con el mismo detector y pinza del laboratorio.
 echo Los mensajes se guardaran en registros\camara_sola.log.
 echo Pulsa Q en la ventana de camara para cerrar.
 ".venv\Scripts\python.exe" -u prueba_camara.py %* > "registros\camara_sola.log" 2>&1

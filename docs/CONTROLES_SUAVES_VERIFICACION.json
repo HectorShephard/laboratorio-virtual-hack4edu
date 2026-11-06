@@ -1,0 +1,336 @@
+{
+  "source": "webcam real, lanzador 2_PROBAR_LAB3D.bat --grip-check",
+  "samples": 2040,
+  "simultaneous_accepted": 2,
+  "capture_events": [
+    {
+      "seconds": 34.6331029999993,
+      "id": 1,
+      "object": "FrascoVinagre",
+      "ratio": 0.29503533945624
+    },
+    {
+      "seconds": 41.3664363333323,
+      "id": 1,
+      "object": "FrascoVinagre",
+      "ratio": 0.39439182187193
+    },
+    {
+      "seconds": 47.0997696666653,
+      "id": 1,
+      "object": "FrascoVinagre",
+      "ratio": 0.33921625239758
+    },
+    {
+      "seconds": 61.7997696666644,
+      "id": 0,
+      "object": "FrascoVinagre",
+      "ratio": 0.289511158489379
+    },
+    {
+      "seconds": 74.2331029999971,
+      "id": 0,
+      "object": "FrascoVinagre",
+      "ratio": 0.286180580134345
+    },
+    {
+      "seconds": 78.7331029999968,
+      "id": 0,
+      "object": "FrascoVinagre",
+      "ratio": 0.442419951250474
+    },
+    {
+      "seconds": 83.9997696666632,
+      "id": 0,
+      "object": "FrascoVinagre",
+      "ratio": 0.418467344988887
+    }
+  ],
+  "summary": {
+    "hands": {
+      "0": {
+        "accepted_frames": 641,
+        "accepted_jumps": 0,
+        "accepted_losses": 9,
+        "assigned_frames": 645,
+        "detector_label_changes": 4,
+        "epoch_changes": 11,
+        "frames": 2040,
+        "identity_label_changes": 0,
+        "raw_frames": 648,
+        "raw_jumps": 0,
+        "raw_losses": 9,
+        "rejections": 7,
+        "uncertain_frames": 3
+      },
+      "1": {
+        "accepted_frames": 959,
+        "accepted_jumps": 0,
+        "accepted_losses": 18,
+        "assigned_frames": 962,
+        "detector_label_changes": 4,
+        "epoch_changes": 18,
+        "frames": 2040,
+        "identity_label_changes": 0,
+        "raw_frames": 965,
+        "raw_jumps": 0,
+        "raw_losses": 19,
+        "rejections": 6,
+        "uncertain_frames": 3
+      }
+    },
+    "note": "Los cambios de etiqueta y de época no equivalen a intercambios físicos confirmados.",
+    "samples": 2040
+  },
+  "control_file": "C:\\Users\\Administrator\\laboratorio-virtual-hack4edu\\registros\\agarre-control-3067.jsonl",
+  "detector_file": "C:\\Users\\Administrator\\laboratorio-virtual-hack4edu\\registros\\manos_juego-18468-2900.jsonl",
+  "guided_result": {
+    "attempts": [
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 1
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 2
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 3
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 4
+      },
+      {
+        "accepted": true,
+        "candidate_seen": true,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_arming",
+        "id": 0,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 5
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_arming",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 6
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_arming",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "Vaso",
+        "trial": 7
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 8
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": true,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "Vaso",
+        "trial": 9
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 0,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 10
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_arming",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 11
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_arming",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 12
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_arming",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 13
+      },
+      {
+        "accepted": true,
+        "candidate_seen": false,
+        "close_seen": true,
+        "detected": true,
+        "failure": "candidate_or_arming",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 14
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "frente",
+        "success": false,
+        "target": "Vaso",
+        "trial": 15
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 16
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "Vaso",
+        "trial": 17
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 18
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": true,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "Vaso",
+        "trial": 19
+      },
+      {
+        "accepted": false,
+        "candidate_seen": false,
+        "close_seen": false,
+        "detected": false,
+        "failure": "detection",
+        "id": 1,
+        "orientation": "canto",
+        "success": false,
+        "target": "FrascoVinagre",
+        "trial": 20
+      }
+    ],
+    "human_compliance": "sin confirmar",
+    "source": "webcam real, instrucciones guiadas",
+    "successes_id0": 0,
+    "successes_id1": 0
+  },
+  "limitation": "No se confirma cumplimiento humano ni lateralidad. El vertido a 18/9 grados y los roles invertidos se verificaron con simulacion."
+}

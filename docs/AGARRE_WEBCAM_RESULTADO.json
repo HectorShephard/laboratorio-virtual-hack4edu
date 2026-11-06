@@ -1,0 +1,58 @@
+{
+  "source": "webcam real desde 2_PROBAR_LAB3D.bat --grip-check",
+  "events_observed": [
+    {
+      "seconds": 8.04165399999996,
+      "id": 1,
+      "object": "FrascoVinagre"
+    },
+    {
+      "seconds": 9.80825000000004,
+      "id": 1,
+      "object": "FrascoVinagre"
+    },
+    {
+      "seconds": 26.3909200000008,
+      "id": 1,
+      "object": "FrascoVinagre"
+    },
+    {
+      "seconds": 29.1574760000009,
+      "id": 1,
+      "object": "Espatula"
+    },
+    {
+      "seconds": 33.3239760000011,
+      "id": 1,
+      "object": "FrascoVinagre"
+    },
+    {
+      "seconds": 37.8904600000013,
+      "id": 1,
+      "object": "FrascoVinagre"
+    },
+    {
+      "seconds": 42.9569240000015,
+      "id": 1,
+      "object": "Espatula"
+    },
+    {
+      "seconds": 50.8899400000019,
+      "id": 1,
+      "object": "Espatula"
+    },
+    {
+      "seconds": 74.0226220000014,
+      "id": 0,
+      "object": "FrascoVinagre"
+    },
+    {
+      "seconds": 84.7559553333341,
+      "id": 1,
+      "object": "Espatula"
+    }
+  ],
+  "note": "No son 20 intentos humanos confirmados. El fichero guiado dio 0/10 por ID para objetivo e intervalo asignados; hubo agarres fuera de los intervalos solicitados. El objetivo >=9/10 sigue sin validación humana.",
+  "trace": "registros/agarre-control-3028.jsonl",
+  "attempts_file": "registros/agarre-webcam-intentos.json"
+}

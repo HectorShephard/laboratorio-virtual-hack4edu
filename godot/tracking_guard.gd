@@ -25,15 +25,19 @@ func evaluate(cursor: Vector2, landmarks: Array, now: float) -> Dictionary:
 		return missing()
 	var scale := 0.0
 	if landmarks.size() == 21:
-		var a := Vector2(float(landmarks[5][0]), float(landmarks[5][1]))
-		var b := Vector2(float(landmarks[17][0]), float(landmarks[17][1]))
-		scale = a.distance_to(b)
-		if not is_finite(scale) or scale < .015 or scale > .8:
+		for p in landmarks:
+			if p.size()<3 or not Vector3(p[0],p[1],p[2]).is_finite(): return missing()
+		# Una mano de canto conserva longitud aunque desaparezca el ancho 5–17.
+		for pair in [[0,9],[0,5],[0,17],[5,17]]:
+			var a: Array = landmarks[pair[0]]
+			var b: Array = landmarks[pair[1]]
+			scale=maxf(scale,Vector3(a[0],a[1],a[2]).distance_to(Vector3(b[0],b[1],b[2])))
+		if not is_finite(scale) or scale < .015 or scale > 1.2:
 			return missing()
 	var max_step := clampf((now - last_time) * 2.4, .14, .22)
 	var scale_ok := last_scale <= 0 or scale <= 0 or (scale / last_scale >= .4 and scale / last_scale <= 2.5)
 	if initialized and cursor.distance_to(last_cursor) <= max_step and scale_ok:
-		var recovered := interrupted
+		var recovered := interrupted and now-last_time>.55
 		_accept(cursor, scale, now)
 		return {"stable": true, "reacquired": recovered}
 	# Reubicaciones grandes necesitan varias observaciones cercanas entre si.
